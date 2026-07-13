@@ -6,6 +6,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -13,12 +14,14 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductByEanDto } from './dto/find-product-by-ean.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
 import { ProductService } from './product.service';
+import { ApiKeyGuard } from '../common/utils/guards/api-key.guard';
 
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @UseGuards(ApiKeyGuard)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: memoryStorage(),

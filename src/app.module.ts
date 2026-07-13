@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ProductModule } from './product/product.module';
 import { StorageModule } from './storage/storage.module';
 import { UnitOfMeasureModule } from './unit-of-measure/unit-of-measure.module';
+import { HealthModule } from './health/health.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { UnitOfMeasureModule } from './unit-of-measure/unit-of-measure.module';
     UnitOfMeasureModule,
     StorageModule,
     ProductModule,
+    HealthModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
