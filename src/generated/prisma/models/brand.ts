@@ -14,7 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model brand
- * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ * 
  */
 export type brandModel = runtime.Types.Result.DefaultSelection<Prisma.$brandPayload>
 
@@ -312,6 +312,18 @@ export type brandSumOrderByAggregateInput = {
 export type BrandScalarRelationFilter = {
   is?: Prisma.brandWhereInput
   isNot?: Prisma.brandWhereInput
+}
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type brandCreateNestedOneWithoutProductsInput = {

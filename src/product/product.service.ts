@@ -12,6 +12,7 @@ import { UnitOfMeasureService } from '../unit-of-measure/unit-of-measure.service
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductByEanDto } from './dto/find-product-by-ean.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductMapper } from './mapper/product.mapper';
 import type { IProductRepository } from './repository/product.repository.interface';
 
@@ -71,7 +72,7 @@ export class ProductService {
         ? await this.storageService.uploadProductImage(createData.ean, image)
         : undefined;
 
-      const persistenceData = ProductMapper.toPersistence(
+      const persistenceData = ProductMapper.toCreatePersistence(
         createData,
         {
           brandId: brand.id,
@@ -88,6 +89,87 @@ export class ProductService {
     } catch (error: unknown) {
       if (imagePath) {
         await this.storageService.deleteProductImage(imagePath);
+      }
+
+      throw error;
+    }
+  }
+
+  async updateProduct(
+    findProductByEanDto: FindProductByEanDto,
+    updateProductDto: UpdateProductDto,
+    image?: Express.Multer.File,
+  ): Promise<ProductResponseDto> {
+    const ean = ProductMapper.toEan(findProductByEanDto);
+
+    const existingProduct = await this.productRepository.findByEan(ean);
+
+    if (!existingProduct) {
+      throw new NotFoundException(
+        'No se encontró un producto para el EAN proporcionado.',
+      );
+    }
+
+    const updateData = ProductMapper.toUpdateData(updateProductDto);
+
+    if (!ProductMapper.hasUpdateData(updateData) && !image) {
+      throw new BadRequestException(
+        'Debe enviar al menos un campo para modificar.',
+      );
+    }
+
+    const brand = updateData.brandName
+      ? await this.brandService.resolveOrCreateByName(updateData.brandName)
+      : null;
+
+    const category = updateData.categoryName
+      ? await this.categoryService.findByName(updateData.categoryName)
+      : null;
+
+    if (updateData.categoryName && !category) {
+      throw new BadRequestException('La categoría indicada no existe.');
+    }
+
+    const unit = updateData.unitAbbreviation
+      ? await this.unitOfMeasureService.findByAbbreviation(
+          updateData.unitAbbreviation,
+        )
+      : null;
+
+    if (updateData.unitAbbreviation && !unit) {
+      throw new BadRequestException('La unidad de medida indicada no existe.');
+    }
+
+    let newImagePath: string | undefined;
+
+    try {
+      newImagePath = image
+        ? await this.storageService.uploadUpdatedProductImage(ean, image)
+        : undefined;
+
+      const persistenceData = ProductMapper.toUpdatePersistence(
+        updateData,
+        {
+          brandId: brand?.id,
+          categoryId: category?.id,
+          unitId: unit?.id,
+        },
+        newImagePath,
+      );
+
+      const updatedProduct = await this.productRepository.updateByEan(
+        ean,
+        persistenceData,
+      );
+
+      if (newImagePath && existingProduct.imagePath) {
+        await this.storageService.deleteProductImage(existingProduct.imagePath);
+      }
+
+      return ProductMapper.toResponse(updatedProduct);
+    } catch (error: unknown) {
+      if (newImagePath) {
+        await this.storageService.deleteProductImage(newImagePath);
       }
 
       throw error;

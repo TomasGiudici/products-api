@@ -1,98 +1,322 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Products API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API de catálogo de productos.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Permite registrar y consultar productos por EAN-13, junto con sus marcas, categorías, unidades de medida e imágenes. Está pensada para ser consumida principalmente por otros sistemas backend.
 
-## Description
+La API no maneja precios, sucursales ni historial de precios.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tecnologías
 
-## Project setup
+- NestJS
+- Prisma
+- PostgreSQL / Supabase
+- Supabase Storage
 
-```bash
-$ npm install
+## Base URL
+
+En desarrollo:
+
+```http
+http://localhost:3000/scanner
 ```
 
-## Compile and run the project
+En producción, reemplazar por la URL correspondiente del despliegue.
 
-```bash
-# development
-$ npm run start
+Ejemplo:
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```http
+https://tu-api-deployada.com/scanner
 ```
 
-## Run tests
+## Variables de entorno
 
-```bash
-# unit tests
-$ npm run test
+Crear un archivo `.env` a partir de `.env.template`.
 
-# e2e tests
-$ npm run test:e2e
+### Descripción de variables
 
-# test coverage
-$ npm run test:cov
+| Variable | Descripción |
+| `NODE_ENV` | Entorno de ejecución. Ejemplo: `development` o `production`. |
+| `DATABASE_URL` | URL de conexión a PostgreSQL/Supabase usada por Prisma. |
+| `PORT` | Puerto donde levanta la API. En producción puede ser asignado por el proveedor. |
+| `CORS_ORIGINS` | Orígenes permitidos para requests desde navegador. Separar múltiples URLs con coma. |
+| `API_KEY` | Clave privada requerida para endpoints de escritura. |
+| `SUPABASE_URL` | URL del proyecto de Supabase. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave service role de Supabase. Solo debe usarse en backend. |
+| `SUPABASE_PRODUCT_IMAGES_BUCKET` | Nombre del bucket de Supabase Storage donde se guardan imágenes de productos. |
+
+## Autenticación
+
+Los endpoints de escritura (POST) requieren API Key.
+
+Debe enviarse el siguiente header:
+
+x-api-key: TU_API_KEY
+
+Los endpoints `GET` no requieren API Key.
+
+Endpoints protegidos:
+
+POST /product
+POST /brand
+POST /category
+POST /unit-of-measure
+
+Endpoints públicos:
+
+GET /health
+GET /product/ean/:ean
+GET /brand
+GET /brand/:id
+GET /category
+GET /category/:id
+GET /unit-of-measure
+GET /unit-of-measure/:id
+
+## Health check
+
+### GET `/health`
+
+Permite verificar que la API está activa.
+
+Ejemplo:
+
+```http
+GET http://localhost:3000/scanner/health
 ```
 
-## Deployment
+Respuesta:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-07-13T15:00:00.000Z"
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Productos
 
-## Resources
+### GET `/product/ean/:ean`
 
-Check out a few resources that may come in handy when working with NestJS:
+Consulta un producto por su código EAN-13.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Ejemplo:
 
-## Support
+```http
+GET http://localhost:3000/scanner/product/ean/7790000000001
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Respuesta:
 
-## Stay in touch
+```json
+{
+  "ean": "7790000000001",
+  "name": "Producto de prueba 500 ml",
+  "brand": {
+    "id": 1,
+    "name": "Coca Cola"
+  },
+  "category": {
+    "id": 1,
+    "name": "Bebidas"
+  },
+  "quantity": 500,
+  "unitsPerPack": 1,
+  "unit": {
+    "id": 1,
+    "name": "Mililitro",
+    "abbreviation": "ml"
+  },
+  "imagePath": "products/7790000000001.jpg"
+}
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Si el producto no existe, responde `404 Not Found`.
 
-## License
+### POST `/product`
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Crea un producto.
+
+Requiere API Key.
+
+Este endpoint acepta `multipart/form-data`, porque puede recibir una imagen.
+
+Campos:
+
+| Campo | Tipo | Requerido | Descripción |
+| `ean` | string | Sí | Código EAN-13 del producto. Debe tener exactamente 13 dígitos. |
+| `name` | string | Sí | Nombre del producto. |
+| `brandName` | string | Sí | Nombre de la marca. Si no existe, se crea automáticamente. |
+| `categoryName` | string | Sí | Nombre de la categoría. Debe existir previamente. |
+| `quantity` | number | No | Cantidad del producto. Ejemplo: `500`, `1.5`. |
+| `unitAbbreviation` | string | No | Abreviatura de unidad de medida. Ejemplo: `ml`, `g`, `kg`. Debe existir previamente. |
+| `unitsPerPack` | number | No | Unidades por pack. |
+| `image` | file | No | Imagen del producto. Formatos permitidos: JPG, PNG o WEBP. |
+
+Ejemplo con `curl` en Windows CMD:
+
+```cmd
+curl.exe -X POST "http://localhost:3000/scanner/product" ^
+  -H "x-api-key: YOUR_PRIVATE_API_KEY" ^
+  -F "ean=7790000000001" ^
+  -F "name=Producto de prueba 500 ml" ^
+  -F "brandName=Coca Cola" ^
+  -F "categoryName=Bebidas" ^
+  -F "quantity=500" ^
+  -F "unitAbbreviation=ml" ^
+  -F "unitsPerPack=1" ^
+  -F "image=@C:\ruta\a\imagen.jpg;type=image/jpeg"
+```
+
+Ejemplo con `curl` en PowerShell:
+
+```powershell
+curl.exe -X POST "http://localhost:3000/scanner/product" `
+  -H "x-api-key: YOUR_PRIVATE_API_KEY" `
+  -F "ean=7790000000001" `
+  -F "name=Producto de prueba 500 ml" `
+  -F "brandName=Coca Cola" `
+  -F "categoryName=Bebidas" `
+  -F "quantity=500" `
+  -F "unitAbbreviation=ml" `
+  -F "unitsPerPack=1" `
+  -F "image=@C:\ruta\a\imagen.jpg;type=image/jpeg"
+```
+
+Notas importantes:
+
+- La marca se crea automáticamente si no existe.
+- La categoría debe existir previamente.
+- La unidad de medida debe existir previamente si se informa `unitAbbreviation`.
+- La imagen es opcional.
+- Si se envía imagen, la API la sube a Supabase Storage.
+- En la base de datos se guarda solo el `imagePath`, no el archivo completo.
+- Si la imagen se sube correctamente pero falla la creación del producto, la API intenta borrar la imagen para evitar archivos huérfanos.
+
+Respuesta esperada:
+
+```json
+{
+  "ean": "7790000000001",
+  "name": "Producto de prueba 500 ml",
+  "brand": {
+    "id": 1,
+    "name": "Coca Cola"
+  },
+  "category": {
+    "id": 1,
+    "name": "Bebidas"
+  },
+  "quantity": 500,
+  "unitsPerPack": 1,
+  "unit": {
+    "id": 1,
+    "name": "Mililitro",
+    "abbreviation": "ml"
+  },
+  "imagePath": "products/7790000000001.jpg"
+}
+```
+
+## Marcas
+
+- La API normaliza internamente el nombre para evitar duplicados equivalentes.
+- Ejemplo: `Coca Cola`, `coca-cola` y `CÓCA  COLA` se consideran equivalentes.
+
+## Categorías
+
+- La API normaliza internamente el nombre para evitar duplicados equivalentes.
+- Las categorías no se crean automáticamente al crear un producto. Deben existir previamente.
+
+## Unidades de medida
+
+- La abreviatura se normaliza internamente.
+- Ejemplo: `ML`, `ml` y `ml.` se consideran equivalentes.
+
+## Imágenes
+
+Las imágenes de productos se envían en el campo `image` del `multipart/form-data`.
+
+Formatos permitidos:
+
+```text
+image/jpeg
+image/png
+image/webp
+```
+
+Tamaño máximo:
+
+```text
+2 MB
+```
+
+La API guarda el archivo en Supabase Storage usando el EAN como nombre base.
+
+Ejemplo de `imagePath` guardado:
+
+```text
+products/7790000000001.jpg
+```
+
+La respuesta del producto devuelve `imagePath`, no una URL pública completa.
+
+Si otro sistema necesita mostrar la imagen, debe resolver ese path según la configuración de Supabase Storage del proyecto.
+
+## Códigos de error comunes
+
+| Código | Caso |
+|---:|---|
+| `400 Bad Request` | Datos inválidos, categoría inexistente, unidad inexistente o imagen inválida. |
+| `401 Unauthorized` | API Key faltante o inválida. |
+| `404 Not Found` | Recurso no encontrado. |
+| `409 Conflict` | Recurso duplicado, por ejemplo producto con EAN ya registrado. |
+| `500 Internal Server Error` | Error interno del servidor. |
+
+## CORS
+
+La variable `CORS_ORIGINS` solo afecta requests realizados desde navegadores.
+
+Las integraciones backend-to-backend no dependen de CORS.
+
+Si la API solo es consumida por otros backends, CORS no limita esas integraciones.
+
+## Ejecución local
+
+Instalar dependencias:
+
+```bash
+npm install
+```
+
+Generar Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+Ejecutar en desarrollo:
+
+```bash
+npm run start:dev
+```
+
+Compilar:
+
+```bash
+npm run build
+```
+
+Ejecutar versión compilada:
+
+```bash
+npm run start:prod
+```
+
+## Pruebas rápidas
+
+Health check:
+
+```http
+GET http://localhost:3000/scanner/health
+```

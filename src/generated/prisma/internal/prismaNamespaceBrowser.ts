@@ -51,14 +51,9 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  branch: 'branch',
   brand: 'brand',
   category: 'category',
-  price_history: 'price_history',
-  product_branch_offer: 'product_branch_offer',
-  product_branch: 'product_branch',
   product: 'product',
-  supermarket: 'supermarket',
   unit_of_measure: 'unit_of_measure'
 } as const
 
@@ -76,18 +71,6 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
-
-
-export const BranchScalarFieldEnum = {
-  id: 'id',
-  supermarket_id: 'supermarket_id',
-  city: 'city',
-  address: 'address',
-  active: 'active',
-  created_at: 'created_at'
-} as const
-
-export type BranchScalarFieldEnum = (typeof BranchScalarFieldEnum)[keyof typeof BranchScalarFieldEnum]
 
 
 export const BrandScalarFieldEnum = {
@@ -108,46 +91,6 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
-export const Price_historyScalarFieldEnum = {
-  id: 'id',
-  product_branch_id: 'product_branch_id',
-  price: 'price',
-  registered_at: 'registered_at'
-} as const
-
-export type Price_historyScalarFieldEnum = (typeof Price_historyScalarFieldEnum)[keyof typeof Price_historyScalarFieldEnum]
-
-
-export const Product_branch_offerScalarFieldEnum = {
-  id: 'id',
-  product_branch_id: 'product_branch_id',
-  offer_type: 'offer_type',
-  quantity_required: 'quantity_required',
-  quantity_paid: 'quantity_paid',
-  total_price: 'total_price',
-  valid_from: 'valid_from',
-  valid_to: 'valid_to',
-  active: 'active',
-  created_at: 'created_at',
-  updated_at: 'updated_at'
-} as const
-
-export type Product_branch_offerScalarFieldEnum = (typeof Product_branch_offerScalarFieldEnum)[keyof typeof Product_branch_offerScalarFieldEnum]
-
-
-export const Product_branchScalarFieldEnum = {
-  id: 'id',
-  product_ean: 'product_ean',
-  branch_id: 'branch_id',
-  current_price: 'current_price',
-  available: 'available',
-  created_at: 'created_at',
-  updated_at: 'updated_at'
-} as const
-
-export type Product_branchScalarFieldEnum = (typeof Product_branchScalarFieldEnum)[keyof typeof Product_branchScalarFieldEnum]
-
-
 export const ProductScalarFieldEnum = {
   ean: 'ean',
   name: 'name',
@@ -162,16 +105,6 @@ export const ProductScalarFieldEnum = {
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
-
-
-export const SupermarketScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  active: 'active',
-  created_at: 'created_at'
-} as const
-
-export type SupermarketScalarFieldEnum = (typeof SupermarketScalarFieldEnum)[keyof typeof SupermarketScalarFieldEnum]
 
 
 export const Unit_of_measureScalarFieldEnum = {

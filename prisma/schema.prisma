@@ -6,26 +6,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["catalog", "comparator"]
+  schemas  = ["catalog"]
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model branch {
-  id               Int              @id @default(autoincrement())
-  supermarket_id   Int
-  city             String           @db.VarChar(100)
-  address          String           @db.VarChar(255)
-  active           Boolean          @default(true)
-  created_at       DateTime         @default(now()) @db.Timestamptz(6)
-  supermarket      supermarket      @relation(fields: [supermarket_id], references: [id], onUpdate: NoAction, map: "fk_branches_supermarket")
-  product_branches product_branch[]
-
-  @@index([supermarket_id], map: "idx_branches_supermarket_id")
-  @@map("branches")
-  @@schema("comparator")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model brand {
   id              Int       @id @default(autoincrement())
   name            String    @unique @db.VarChar(100)
@@ -36,7 +19,6 @@ model brand {
   @@schema("catalog")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model category {
   id              Int       @id @default(autoincrement())
   name            String    @unique @db.VarChar(100)
@@ -47,80 +29,21 @@ model category {
   @@schema("catalog")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model price_history {
-  id                BigInt         @id @default(autoincrement())
-  product_branch_id Int
-  price             Decimal        @db.Decimal(12, 2)
-  registered_at     DateTime       @default(now()) @db.Timestamptz(6)
-  product_branch    product_branch @relation(fields: [product_branch_id], references: [id], onUpdate: NoAction, map: "fk_price_history_product_branch")
-
-  @@index([product_branch_id], map: "idx_price_history_product_branch_id")
-  @@index([registered_at], map: "idx_price_history_registered_at")
-  @@map("price_history")
-  @@schema("comparator")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_branch_offer {
-  id                Int            @id @default(autoincrement())
-  product_branch_id Int
-  offer_type        String         @db.VarChar(50)
-  quantity_required Int
-  quantity_paid     Int
-  total_price       Decimal        @db.Decimal(12, 2)
-  valid_from        DateTime?      @db.Date
-  valid_to          DateTime?      @db.Date
-  active            Boolean        @default(true)
-  created_at        DateTime       @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime       @default(now()) @db.Timestamptz(6)
-  product_branch    product_branch @relation(fields: [product_branch_id], references: [id], onUpdate: NoAction, map: "fk_product_branch_offers_product_branch")
-
-  @@index([product_branch_id], map: "idx_product_branch_offers_product_branch_id")
-  @@map("product_branch_offers")
-  @@schema("comparator")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_branch {
-  id                    Int                    @id @default(autoincrement())
-  product_ean           String                 @db.VarChar(13)
-  branch_id             Int
-  current_price         Decimal                @db.Decimal(12, 2)
-  available             Boolean                @default(true)
-  created_at            DateTime               @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime               @default(now()) @db.Timestamptz(6)
-  price_history         price_history[]
-  product_branch_offers product_branch_offer[]
-  branch                branch                 @relation(fields: [branch_id], references: [id], onUpdate: NoAction, map: "fk_product_branches_branch")
-  product               product                @relation(fields: [product_ean], references: [ean], onUpdate: NoAction, map: "fk_product_branches_product")
-
-  @@unique([product_ean, branch_id], map: "uq_product_branches_product_branch")
-  @@index([branch_id], map: "idx_product_branches_branch_id")
-  @@map("product_branches")
-  @@schema("comparator")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model product {
-  ean              String           @id @unique @db.VarChar(13)
-  name             String           @db.VarChar(255)
-  brand_id         Int
-  category_id      Int
-  quantity         Decimal?         @db.Decimal(10, 2)
-  unit_id          Int?
-  units_per_pack   Int?
-  image_path       String?
-  created_at       DateTime         @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime         @default(now()) @db.Timestamptz(6)
-  product_branches product_branch[]
-  brand            brand            @relation(fields: [brand_id], references: [id], onUpdate: NoAction, map: "fk_products_brand")
-  category         category         @relation(fields: [category_id], references: [id], onUpdate: NoAction, map: "fk_products_category")
-  unit_of_measure  unit_of_measure? @relation(fields: [unit_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_products_unit")
+  ean            String           @id @unique @db.VarChar(13)
+  name           String           @db.VarChar(255)
+  brand_id       Int
+  category_id    Int
+  quantity       Decimal?         @db.Decimal(10, 2)
+  unit_id        Int?
+  units_per_pack Int?
+  image_path     String?
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime         @default(now()) @db.Timestamptz(6)
+
+  brand           brand            @relation(fields: [brand_id], references: [id], onUpdate: NoAction, map: "fk_products_brand")
+  category        category         @relation(fields: [category_id], references: [id], onUpdate: NoAction, map: "fk_products_category")
+  unit_of_measure unit_of_measure? @relation(fields: [unit_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_products_unit")
 
   @@index([brand_id], map: "idx_products_brand_id")
   @@index([category_id], map: "idx_products_category_id")
@@ -128,19 +51,6 @@ model product {
   @@schema("catalog")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model supermarket {
-  id         Int      @id @default(autoincrement())
-  name       String   @unique @db.VarChar(100)
-  active     Boolean  @default(true)
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  branches   branch[]
-
-  @@map("supermarkets")
-  @@schema("comparator")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model unit_of_measure {
   id           Int       @id @default(autoincrement())
   name         String    @db.VarChar(50)

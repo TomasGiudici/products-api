@@ -8,13 +8,8 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/branch.js'
 export type * from './models/brand.js'
 export type * from './models/category.js'
-export type * from './models/price_history.js'
-export type * from './models/product_branch_offer.js'
-export type * from './models/product_branch.js'
 export type * from './models/product.js'
-export type * from './models/supermarket.js'
 export type * from './models/unit_of_measure.js'
 export type * from './commonInputTypes.js'

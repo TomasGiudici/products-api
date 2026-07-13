@@ -8,7 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class StorageService {
-  private readonly supabase;
+  private readonly supabase: ReturnType<typeof createClient>;
   private readonly productImagesBucket: string;
 
   constructor(private readonly configService: ConfigService) {
@@ -33,6 +33,32 @@ export class StorageService {
 
     const extension = this.getImageExtension(file.mimetype);
     const imagePath = `products/${ean}.${extension}`;
+
+    const { error } = await this.supabase.storage
+      .from(this.productImagesBucket)
+      .upload(imagePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      });
+
+    if (error) {
+      throw new InternalServerErrorException(
+        'No se pudo subir la imagen del producto.',
+      );
+    }
+
+    return imagePath;
+  }
+
+  async uploadUpdatedProductImage(
+    ean: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    this.validateImage(file);
+
+    const extension = this.getImageExtension(file.mimetype);
+    const timestamp = Date.now();
+    const imagePath = `products/${ean}-${timestamp}.${extension}`;
 
     const { error } = await this.supabase.storage
       .from(this.productImagesBucket)

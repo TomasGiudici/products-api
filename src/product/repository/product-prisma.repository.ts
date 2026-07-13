@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { CreateProductPersistenceData } from '../interface/create-product-data.interface';
+import type {
+  CreateProductPersistenceData,
+  UpdateProductPersistenceData,
+} from '../interface/create-product-data.interface';
 import type { ProductDetail } from '../interface/product-detail.interface';
 import type { IProductRepository } from './product.repository.interface';
 
@@ -31,6 +34,33 @@ export class ProductPrismaRepository implements IProductRepository {
     const product = await this.prisma.product.create({
       data: {
         ean: data.ean,
+        name: data.name,
+        brand_id: data.brand_id,
+        category_id: data.category_id,
+        quantity: data.quantity,
+        unit_id: data.unit_id,
+        units_per_pack: data.units_per_pack,
+        image_path: data.image_path,
+      },
+      include: {
+        brand: true,
+        category: true,
+        unit_of_measure: true,
+      },
+    });
+
+    return this.toProductDetail(product);
+  }
+
+  async updateByEan(
+    ean: string,
+    data: UpdateProductPersistenceData,
+  ): Promise<ProductDetail> {
+    const product = await this.prisma.product.update({
+      where: {
+        ean,
+      },
+      data: {
         name: data.name,
         brand_id: data.brand_id,
         category_id: data.category_id,
