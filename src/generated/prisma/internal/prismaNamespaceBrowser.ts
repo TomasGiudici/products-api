@@ -51,9 +51,11 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  identifier_type: 'identifier_type',
+  item_type: 'item_type',
   brand: 'brand',
   category: 'category',
-  product: 'product',
+  item: 'item',
   unit_of_measure: 'unit_of_measure'
 } as const
 
@@ -71,6 +73,29 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const Identifier_typeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  description: 'description',
+  active: 'active'
+} as const
+
+export type Identifier_typeScalarFieldEnum = (typeof Identifier_typeScalarFieldEnum)[keyof typeof Identifier_typeScalarFieldEnum]
+
+
+export const Item_typeScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  description: 'description',
+  metadata_schema: 'metadata_schema',
+  active: 'active'
+} as const
+
+export type Item_typeScalarFieldEnum = (typeof Item_typeScalarFieldEnum)[keyof typeof Item_typeScalarFieldEnum]
 
 
 export const BrandScalarFieldEnum = {
@@ -91,8 +116,12 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
-export const ProductScalarFieldEnum = {
-  ean: 'ean',
+export const ItemScalarFieldEnum = {
+  id: 'id',
+  identifier_type_id: 'identifier_type_id',
+  identifier_value: 'identifier_value',
+  normalized_identifier_value: 'normalized_identifier_value',
+  item_type_id: 'item_type_id',
   name: 'name',
   brand_id: 'brand_id',
   category_id: 'category_id',
@@ -100,11 +129,12 @@ export const ProductScalarFieldEnum = {
   unit_id: 'unit_id',
   units_per_pack: 'units_per_pack',
   image_path: 'image_path',
+  metadata: 'metadata',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
 
-export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof ItemScalarFieldEnum]
 
 
 export const Unit_of_measureScalarFieldEnum = {
@@ -124,6 +154,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -138,4 +176,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

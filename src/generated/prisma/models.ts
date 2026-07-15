@@ -8,8 +8,10 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/identifier_type.js'
+export type * from './models/item_type.js'
 export type * from './models/brand.js'
 export type * from './models/category.js'
-export type * from './models/product.js'
+export type * from './models/item.js'
 export type * from './models/unit_of_measure.js'
 export type * from './commonInputTypes.js'

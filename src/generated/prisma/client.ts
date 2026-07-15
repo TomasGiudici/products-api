@@ -29,8 +29,8 @@ export * from "./enums.js"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Brands
- * const brands = await prisma.brand.findMany()
+ * // Fetch zero or more Identifier_types
+ * const identifier_types = await prisma.identifier_type.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -39,6 +39,16 @@ export const PrismaClient = $Class.getPrismaClientClass()
 export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts extends Prisma.PrismaClientOptions["omit"] = Prisma.PrismaClientOptions["omit"], ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = $Class.PrismaClient<LogOpts, OmitOpts, ExtArgs>
 export { Prisma }
 
+/**
+ * Model identifier_type
+ * 
+ */
+export type identifier_type = Prisma.identifier_typeModel
+/**
+ * Model item_type
+ * 
+ */
+export type item_type = Prisma.item_typeModel
 /**
  * Model brand
  * 
@@ -50,10 +60,10 @@ export type brand = Prisma.brandModel
  */
 export type category = Prisma.categoryModel
 /**
- * Model product
+ * Model item
  * 
  */
-export type product = Prisma.productModel
+export type item = Prisma.itemModel
 /**
  * Model unit_of_measure
  * 

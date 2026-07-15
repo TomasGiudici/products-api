@@ -200,14 +200,14 @@ export type brandWhereInput = {
   id?: Prisma.IntFilter<"brand"> | number
   name?: Prisma.StringFilter<"brand"> | string
   normalized_name?: Prisma.StringFilter<"brand"> | string
-  products?: Prisma.ProductListRelationFilter
+  items?: Prisma.ItemListRelationFilter
 }
 
 export type brandOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   normalized_name?: Prisma.SortOrder
-  products?: Prisma.productOrderByRelationAggregateInput
+  items?: Prisma.itemOrderByRelationAggregateInput
 }
 
 export type brandWhereUniqueInput = Prisma.AtLeast<{
@@ -217,7 +217,7 @@ export type brandWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.brandWhereInput | Prisma.brandWhereInput[]
   OR?: Prisma.brandWhereInput[]
   NOT?: Prisma.brandWhereInput | Prisma.brandWhereInput[]
-  products?: Prisma.ProductListRelationFilter
+  items?: Prisma.ItemListRelationFilter
 }, "id" | "name" | "normalized_name">
 
 export type brandOrderByWithAggregationInput = {
@@ -243,27 +243,27 @@ export type brandScalarWhereWithAggregatesInput = {
 export type brandCreateInput = {
   name: string
   normalized_name: string
-  products?: Prisma.productCreateNestedManyWithoutBrandInput
+  items?: Prisma.itemCreateNestedManyWithoutBrandInput
 }
 
 export type brandUncheckedCreateInput = {
   id?: number
   name: string
   normalized_name: string
-  products?: Prisma.productUncheckedCreateNestedManyWithoutBrandInput
+  items?: Prisma.itemUncheckedCreateNestedManyWithoutBrandInput
 }
 
 export type brandUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
-  products?: Prisma.productUpdateManyWithoutBrandNestedInput
+  items?: Prisma.itemUpdateManyWithoutBrandNestedInput
 }
 
 export type brandUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
-  products?: Prisma.productUncheckedUpdateManyWithoutBrandNestedInput
+  items?: Prisma.itemUncheckedUpdateManyWithoutBrandNestedInput
 }
 
 export type brandCreateManyInput = {
@@ -309,70 +309,60 @@ export type brandSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
 }
 
-export type BrandScalarRelationFilter = {
-  is?: Prisma.brandWhereInput
-  isNot?: Prisma.brandWhereInput
+export type BrandNullableScalarRelationFilter = {
+  is?: Prisma.brandWhereInput | null
+  isNot?: Prisma.brandWhereInput | null
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
-}
-
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
-export type brandCreateNestedOneWithoutProductsInput = {
-  create?: Prisma.XOR<Prisma.brandCreateWithoutProductsInput, Prisma.brandUncheckedCreateWithoutProductsInput>
-  connectOrCreate?: Prisma.brandCreateOrConnectWithoutProductsInput
+export type brandCreateNestedOneWithoutItemsInput = {
+  create?: Prisma.XOR<Prisma.brandCreateWithoutItemsInput, Prisma.brandUncheckedCreateWithoutItemsInput>
+  connectOrCreate?: Prisma.brandCreateOrConnectWithoutItemsInput
   connect?: Prisma.brandWhereUniqueInput
 }
 
-export type brandUpdateOneRequiredWithoutProductsNestedInput = {
-  create?: Prisma.XOR<Prisma.brandCreateWithoutProductsInput, Prisma.brandUncheckedCreateWithoutProductsInput>
-  connectOrCreate?: Prisma.brandCreateOrConnectWithoutProductsInput
-  upsert?: Prisma.brandUpsertWithoutProductsInput
+export type brandUpdateOneWithoutItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.brandCreateWithoutItemsInput, Prisma.brandUncheckedCreateWithoutItemsInput>
+  connectOrCreate?: Prisma.brandCreateOrConnectWithoutItemsInput
+  upsert?: Prisma.brandUpsertWithoutItemsInput
+  disconnect?: Prisma.brandWhereInput | boolean
+  delete?: Prisma.brandWhereInput | boolean
   connect?: Prisma.brandWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.brandUpdateToOneWithWhereWithoutProductsInput, Prisma.brandUpdateWithoutProductsInput>, Prisma.brandUncheckedUpdateWithoutProductsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.brandUpdateToOneWithWhereWithoutItemsInput, Prisma.brandUpdateWithoutItemsInput>, Prisma.brandUncheckedUpdateWithoutItemsInput>
 }
 
-export type brandCreateWithoutProductsInput = {
+export type brandCreateWithoutItemsInput = {
   name: string
   normalized_name: string
 }
 
-export type brandUncheckedCreateWithoutProductsInput = {
+export type brandUncheckedCreateWithoutItemsInput = {
   id?: number
   name: string
   normalized_name: string
 }
 
-export type brandCreateOrConnectWithoutProductsInput = {
+export type brandCreateOrConnectWithoutItemsInput = {
   where: Prisma.brandWhereUniqueInput
-  create: Prisma.XOR<Prisma.brandCreateWithoutProductsInput, Prisma.brandUncheckedCreateWithoutProductsInput>
+  create: Prisma.XOR<Prisma.brandCreateWithoutItemsInput, Prisma.brandUncheckedCreateWithoutItemsInput>
 }
 
-export type brandUpsertWithoutProductsInput = {
-  update: Prisma.XOR<Prisma.brandUpdateWithoutProductsInput, Prisma.brandUncheckedUpdateWithoutProductsInput>
-  create: Prisma.XOR<Prisma.brandCreateWithoutProductsInput, Prisma.brandUncheckedCreateWithoutProductsInput>
+export type brandUpsertWithoutItemsInput = {
+  update: Prisma.XOR<Prisma.brandUpdateWithoutItemsInput, Prisma.brandUncheckedUpdateWithoutItemsInput>
+  create: Prisma.XOR<Prisma.brandCreateWithoutItemsInput, Prisma.brandUncheckedCreateWithoutItemsInput>
   where?: Prisma.brandWhereInput
 }
 
-export type brandUpdateToOneWithWhereWithoutProductsInput = {
+export type brandUpdateToOneWithWhereWithoutItemsInput = {
   where?: Prisma.brandWhereInput
-  data: Prisma.XOR<Prisma.brandUpdateWithoutProductsInput, Prisma.brandUncheckedUpdateWithoutProductsInput>
+  data: Prisma.XOR<Prisma.brandUpdateWithoutItemsInput, Prisma.brandUncheckedUpdateWithoutItemsInput>
 }
 
-export type brandUpdateWithoutProductsInput = {
+export type brandUpdateWithoutItemsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
-export type brandUncheckedUpdateWithoutProductsInput = {
+export type brandUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -384,11 +374,11 @@ export type brandUncheckedUpdateWithoutProductsInput = {
  */
 
 export type BrandCountOutputType = {
-  products: number
+  items: number
 }
 
 export type BrandCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  products?: boolean | BrandCountOutputTypeCountProductsArgs
+  items?: boolean | BrandCountOutputTypeCountItemsArgs
 }
 
 /**
@@ -404,8 +394,8 @@ export type BrandCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
 /**
  * BrandCountOutputType without action
  */
-export type BrandCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.productWhereInput
+export type BrandCountOutputTypeCountItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.itemWhereInput
 }
 
 
@@ -413,7 +403,7 @@ export type brandSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   id?: boolean
   name?: boolean
   normalized_name?: boolean
-  products?: boolean | Prisma.brand$productsArgs<ExtArgs>
+  items?: boolean | Prisma.brand$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.BrandCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["brand"]>
 
@@ -437,7 +427,7 @@ export type brandSelectScalar = {
 
 export type brandOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "normalized_name", ExtArgs["result"]["brand"]>
 export type brandInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  products?: boolean | Prisma.brand$productsArgs<ExtArgs>
+  items?: boolean | Prisma.brand$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.BrandCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type brandIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -446,7 +436,7 @@ export type brandIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type $brandPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "brand"
   objects: {
-    products: Prisma.$productPayload<ExtArgs>[]
+    items: Prisma.$itemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -846,7 +836,7 @@ readonly fields: brandFieldRefs;
  */
 export interface Prisma__brandClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  products<T extends Prisma.brand$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.brand$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$productPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  items<T extends Prisma.brand$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.brand$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$itemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1272,27 +1262,27 @@ export type brandDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
- * brand.products
+ * brand.items
  */
-export type brand$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type brand$itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the product
+   * Select specific fields to fetch from the item
    */
-  select?: Prisma.productSelect<ExtArgs> | null
+  select?: Prisma.itemSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the product
+   * Omit specific fields from the item
    */
-  omit?: Prisma.productOmit<ExtArgs> | null
+  omit?: Prisma.itemOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.productInclude<ExtArgs> | null
-  where?: Prisma.productWhereInput
-  orderBy?: Prisma.productOrderByWithRelationInput | Prisma.productOrderByWithRelationInput[]
-  cursor?: Prisma.productWhereUniqueInput
+  include?: Prisma.itemInclude<ExtArgs> | null
+  where?: Prisma.itemWhereInput
+  orderBy?: Prisma.itemOrderByWithRelationInput | Prisma.itemOrderByWithRelationInput[]
+  cursor?: Prisma.itemWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+  distinct?: Prisma.ItemScalarFieldEnum | Prisma.ItemScalarFieldEnum[]
 }
 
 /**

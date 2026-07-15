@@ -200,14 +200,14 @@ export type categoryWhereInput = {
   id?: Prisma.IntFilter<"category"> | number
   name?: Prisma.StringFilter<"category"> | string
   normalized_name?: Prisma.StringFilter<"category"> | string
-  products?: Prisma.ProductListRelationFilter
+  items?: Prisma.ItemListRelationFilter
 }
 
 export type categoryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   normalized_name?: Prisma.SortOrder
-  products?: Prisma.productOrderByRelationAggregateInput
+  items?: Prisma.itemOrderByRelationAggregateInput
 }
 
 export type categoryWhereUniqueInput = Prisma.AtLeast<{
@@ -217,7 +217,7 @@ export type categoryWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.categoryWhereInput | Prisma.categoryWhereInput[]
   OR?: Prisma.categoryWhereInput[]
   NOT?: Prisma.categoryWhereInput | Prisma.categoryWhereInput[]
-  products?: Prisma.ProductListRelationFilter
+  items?: Prisma.ItemListRelationFilter
 }, "id" | "name" | "normalized_name">
 
 export type categoryOrderByWithAggregationInput = {
@@ -243,27 +243,27 @@ export type categoryScalarWhereWithAggregatesInput = {
 export type categoryCreateInput = {
   name: string
   normalized_name: string
-  products?: Prisma.productCreateNestedManyWithoutCategoryInput
+  items?: Prisma.itemCreateNestedManyWithoutCategoryInput
 }
 
 export type categoryUncheckedCreateInput = {
   id?: number
   name: string
   normalized_name: string
-  products?: Prisma.productUncheckedCreateNestedManyWithoutCategoryInput
+  items?: Prisma.itemUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type categoryUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
-  products?: Prisma.productUpdateManyWithoutCategoryNestedInput
+  items?: Prisma.itemUpdateManyWithoutCategoryNestedInput
 }
 
 export type categoryUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
-  products?: Prisma.productUncheckedUpdateManyWithoutCategoryNestedInput
+  items?: Prisma.itemUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type categoryCreateManyInput = {
@@ -309,58 +309,60 @@ export type categorySumOrderByAggregateInput = {
   id?: Prisma.SortOrder
 }
 
-export type CategoryScalarRelationFilter = {
-  is?: Prisma.categoryWhereInput
-  isNot?: Prisma.categoryWhereInput
+export type CategoryNullableScalarRelationFilter = {
+  is?: Prisma.categoryWhereInput | null
+  isNot?: Prisma.categoryWhereInput | null
 }
 
-export type categoryCreateNestedOneWithoutProductsInput = {
-  create?: Prisma.XOR<Prisma.categoryCreateWithoutProductsInput, Prisma.categoryUncheckedCreateWithoutProductsInput>
-  connectOrCreate?: Prisma.categoryCreateOrConnectWithoutProductsInput
+export type categoryCreateNestedOneWithoutItemsInput = {
+  create?: Prisma.XOR<Prisma.categoryCreateWithoutItemsInput, Prisma.categoryUncheckedCreateWithoutItemsInput>
+  connectOrCreate?: Prisma.categoryCreateOrConnectWithoutItemsInput
   connect?: Prisma.categoryWhereUniqueInput
 }
 
-export type categoryUpdateOneRequiredWithoutProductsNestedInput = {
-  create?: Prisma.XOR<Prisma.categoryCreateWithoutProductsInput, Prisma.categoryUncheckedCreateWithoutProductsInput>
-  connectOrCreate?: Prisma.categoryCreateOrConnectWithoutProductsInput
-  upsert?: Prisma.categoryUpsertWithoutProductsInput
+export type categoryUpdateOneWithoutItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.categoryCreateWithoutItemsInput, Prisma.categoryUncheckedCreateWithoutItemsInput>
+  connectOrCreate?: Prisma.categoryCreateOrConnectWithoutItemsInput
+  upsert?: Prisma.categoryUpsertWithoutItemsInput
+  disconnect?: Prisma.categoryWhereInput | boolean
+  delete?: Prisma.categoryWhereInput | boolean
   connect?: Prisma.categoryWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.categoryUpdateToOneWithWhereWithoutProductsInput, Prisma.categoryUpdateWithoutProductsInput>, Prisma.categoryUncheckedUpdateWithoutProductsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.categoryUpdateToOneWithWhereWithoutItemsInput, Prisma.categoryUpdateWithoutItemsInput>, Prisma.categoryUncheckedUpdateWithoutItemsInput>
 }
 
-export type categoryCreateWithoutProductsInput = {
+export type categoryCreateWithoutItemsInput = {
   name: string
   normalized_name: string
 }
 
-export type categoryUncheckedCreateWithoutProductsInput = {
+export type categoryUncheckedCreateWithoutItemsInput = {
   id?: number
   name: string
   normalized_name: string
 }
 
-export type categoryCreateOrConnectWithoutProductsInput = {
+export type categoryCreateOrConnectWithoutItemsInput = {
   where: Prisma.categoryWhereUniqueInput
-  create: Prisma.XOR<Prisma.categoryCreateWithoutProductsInput, Prisma.categoryUncheckedCreateWithoutProductsInput>
+  create: Prisma.XOR<Prisma.categoryCreateWithoutItemsInput, Prisma.categoryUncheckedCreateWithoutItemsInput>
 }
 
-export type categoryUpsertWithoutProductsInput = {
-  update: Prisma.XOR<Prisma.categoryUpdateWithoutProductsInput, Prisma.categoryUncheckedUpdateWithoutProductsInput>
-  create: Prisma.XOR<Prisma.categoryCreateWithoutProductsInput, Prisma.categoryUncheckedCreateWithoutProductsInput>
+export type categoryUpsertWithoutItemsInput = {
+  update: Prisma.XOR<Prisma.categoryUpdateWithoutItemsInput, Prisma.categoryUncheckedUpdateWithoutItemsInput>
+  create: Prisma.XOR<Prisma.categoryCreateWithoutItemsInput, Prisma.categoryUncheckedCreateWithoutItemsInput>
   where?: Prisma.categoryWhereInput
 }
 
-export type categoryUpdateToOneWithWhereWithoutProductsInput = {
+export type categoryUpdateToOneWithWhereWithoutItemsInput = {
   where?: Prisma.categoryWhereInput
-  data: Prisma.XOR<Prisma.categoryUpdateWithoutProductsInput, Prisma.categoryUncheckedUpdateWithoutProductsInput>
+  data: Prisma.XOR<Prisma.categoryUpdateWithoutItemsInput, Prisma.categoryUncheckedUpdateWithoutItemsInput>
 }
 
-export type categoryUpdateWithoutProductsInput = {
+export type categoryUpdateWithoutItemsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
-export type categoryUncheckedUpdateWithoutProductsInput = {
+export type categoryUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -372,11 +374,11 @@ export type categoryUncheckedUpdateWithoutProductsInput = {
  */
 
 export type CategoryCountOutputType = {
-  products: number
+  items: number
 }
 
 export type CategoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  products?: boolean | CategoryCountOutputTypeCountProductsArgs
+  items?: boolean | CategoryCountOutputTypeCountItemsArgs
 }
 
 /**
@@ -392,8 +394,8 @@ export type CategoryCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ext
 /**
  * CategoryCountOutputType without action
  */
-export type CategoryCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.productWhereInput
+export type CategoryCountOutputTypeCountItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.itemWhereInput
 }
 
 
@@ -401,7 +403,7 @@ export type categorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id?: boolean
   name?: boolean
   normalized_name?: boolean
-  products?: boolean | Prisma.category$productsArgs<ExtArgs>
+  items?: boolean | Prisma.category$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["category"]>
 
@@ -425,7 +427,7 @@ export type categorySelectScalar = {
 
 export type categoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "normalized_name", ExtArgs["result"]["category"]>
 export type categoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  products?: boolean | Prisma.category$productsArgs<ExtArgs>
+  items?: boolean | Prisma.category$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type categoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -434,7 +436,7 @@ export type categoryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type $categoryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "category"
   objects: {
-    products: Prisma.$productPayload<ExtArgs>[]
+    items: Prisma.$itemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -834,7 +836,7 @@ readonly fields: categoryFieldRefs;
  */
 export interface Prisma__categoryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  products<T extends Prisma.category$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.category$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$productPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  items<T extends Prisma.category$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.category$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$itemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1260,27 +1262,27 @@ export type categoryDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
- * category.products
+ * category.items
  */
-export type category$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type category$itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the product
+   * Select specific fields to fetch from the item
    */
-  select?: Prisma.productSelect<ExtArgs> | null
+  select?: Prisma.itemSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the product
+   * Omit specific fields from the item
    */
-  omit?: Prisma.productOmit<ExtArgs> | null
+  omit?: Prisma.itemOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.productInclude<ExtArgs> | null
-  where?: Prisma.productWhereInput
-  orderBy?: Prisma.productOrderByWithRelationInput | Prisma.productOrderByWithRelationInput[]
-  cursor?: Prisma.productWhereUniqueInput
+  include?: Prisma.itemInclude<ExtArgs> | null
+  where?: Prisma.itemWhereInput
+  orderBy?: Prisma.itemOrderByWithRelationInput | Prisma.itemOrderByWithRelationInput[]
+  cursor?: Prisma.itemWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+  distinct?: Prisma.ItemScalarFieldEnum | Prisma.ItemScalarFieldEnum[]
 }
 
 /**

@@ -1,17 +1,42 @@
+import { Transform, Type } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Matches,
   MaxLength,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
-export class UpdateProductDto {
+export class CreateItemDto {
+  @IsString()
+  @IsNotEmpty({
+    message: 'identifierTypeCode no puede estar vacío.',
+  })
+  @MaxLength(50, {
+    message: 'identifierTypeCode no puede superar los 50 caracteres.',
+  })
+  identifierTypeCode!: string;
+
+  @IsString()
+  @IsNotEmpty({
+    message: 'identifierValue no puede estar vacío.',
+  })
+  @MaxLength(100, {
+    message: 'identifierValue no puede superar los 100 caracteres.',
+  })
+  identifierValue!: string;
+
   @IsOptional()
+  @IsString()
+  @MaxLength(50, {
+    message: 'itemTypeCode no puede superar los 50 caracteres.',
+  })
+  itemTypeCode?: string;
+
   @IsString()
   @IsNotEmpty({
     message: 'name no puede estar vacío.',
@@ -22,13 +47,10 @@ export class UpdateProductDto {
   @MaxLength(255, {
     message: 'name no puede superar los 255 caracteres.',
   })
-  name?: string;
+  name!: string;
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty({
-    message: 'brandName no puede estar vacío.',
-  })
   @Matches(/\S/, {
     message: 'brandName no puede contener solo espacios.',
   })
@@ -39,9 +61,6 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty({
-    message: 'categoryName no puede estar vacío.',
-  })
   @Matches(/\S/, {
     message: 'categoryName no puede contener solo espacios.',
   })
@@ -82,4 +101,21 @@ export class UpdateProductDto {
     message: 'unitsPerPack debe ser mayor a cero.',
   })
   unitsPerPack?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') {
+      return value as Record<string, unknown>;
+    }
+
+    try {
+      return JSON.parse(value) as Record<string, unknown>;
+    } catch {
+      return value;
+    }
+  })
+  @IsObject({
+    message: 'metadata debe ser un objeto JSON.',
+  })
+  metadata?: Record<string, unknown>;
 }

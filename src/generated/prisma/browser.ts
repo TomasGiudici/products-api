@@ -18,6 +18,16 @@ export { Prisma }
 export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
+ * Model identifier_type
+ * 
+ */
+export type identifier_type = Prisma.identifier_typeModel
+/**
+ * Model item_type
+ * 
+ */
+export type item_type = Prisma.item_typeModel
+/**
  * Model brand
  * 
  */
@@ -28,10 +38,10 @@ export type brand = Prisma.brandModel
  */
 export type category = Prisma.categoryModel
 /**
- * Model product
+ * Model item
  * 
  */
-export type product = Prisma.productModel
+export type item = Prisma.itemModel
 /**
  * Model unit_of_measure
  * 

@@ -1,25 +1,25 @@
+import { Transform, Type } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Matches,
   MaxLength,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
-// Este DTO tiene los atributos quantity y unitsPerPack. Deberían ser numéricos, pero se reciben como strings en el request.
-// Esto sucede porque al recibir imagenes, el request no es un json, es un multipart/form-data. Por eso se usa @Type(() => Number) para transformarlos a números.
-
-export class CreateProductDto {
+export class UpdateItemDto {
+  @IsOptional()
   @IsString()
-  @Matches(/^\d{13}$/, {
-    message: 'ean debe contener exactamente 13 dígitos.',
+  @MaxLength(50, {
+    message: 'itemTypeCode no puede superar los 50 caracteres.',
   })
-  ean!: string;
+  itemTypeCode?: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty({
     message: 'name no puede estar vacío.',
@@ -30,31 +30,27 @@ export class CreateProductDto {
   @MaxLength(255, {
     message: 'name no puede superar los 255 caracteres.',
   })
-  name!: string;
+  name?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({
-    message: 'brandName no puede estar vacío.',
-  })
   @Matches(/\S/, {
     message: 'brandName no puede contener solo espacios.',
   })
   @MaxLength(100, {
     message: 'brandName no puede superar los 100 caracteres.',
   })
-  brandName!: string;
+  brandName?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty({
-    message: 'categoryName no puede estar vacío.',
-  })
   @Matches(/\S/, {
     message: 'categoryName no puede contener solo espacios.',
   })
   @MaxLength(100, {
     message: 'categoryName no puede superar los 100 caracteres.',
   })
-  categoryName!: string;
+  categoryName?: string;
 
   @IsOptional()
   @Type(() => Number)
@@ -88,4 +84,21 @@ export class CreateProductDto {
     message: 'unitsPerPack debe ser mayor a cero.',
   })
   unitsPerPack?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') {
+      return value as Record<string, unknown>;
+    }
+
+    try {
+      return JSON.parse(value) as Record<string, unknown>;
+    } catch {
+      return value;
+    }
+  })
+  @IsObject({
+    message: 'metadata debe ser un objeto JSON.',
+  })
+  metadata?: Record<string, unknown>;
 }

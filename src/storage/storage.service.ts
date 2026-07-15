@@ -25,14 +25,17 @@ export class StorageService {
     this.supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
   }
 
-  async uploadProductImage(
-    ean: string,
+  async uploadItemImage(
+    identifierTypeCode: string,
+    normalizedIdentifierValue: string,
     file: Express.Multer.File,
   ): Promise<string> {
     this.validateImage(file);
 
     const extension = this.getImageExtension(file.mimetype);
-    const imagePath = `products/${ean}.${extension}`;
+    const imagePath = `items/${this.toSafePathSegment(
+      identifierTypeCode,
+    )}-${this.toSafePathSegment(normalizedIdentifierValue)}.${extension}`;
 
     const { error } = await this.supabase.storage
       .from(this.productImagesBucket)
@@ -43,22 +46,28 @@ export class StorageService {
 
     if (error) {
       throw new InternalServerErrorException(
-        'No se pudo subir la imagen del producto.',
+        'No se pudo subir la imagen del ítem.',
       );
     }
 
     return imagePath;
   }
 
-  async uploadUpdatedProductImage(
-    ean: string,
+  async uploadUpdatedItemImage(
+    identifierTypeCode: string,
+    normalizedIdentifierValue: string,
     file: Express.Multer.File,
   ): Promise<string> {
     this.validateImage(file);
 
     const extension = this.getImageExtension(file.mimetype);
     const timestamp = Date.now();
-    const imagePath = `products/${ean}-${timestamp}.${extension}`;
+
+    const imagePath = `items/${this.toSafePathSegment(
+      identifierTypeCode,
+    )}-${this.toSafePathSegment(
+      normalizedIdentifierValue,
+    )}-${timestamp}.${extension}`;
 
     const { error } = await this.supabase.storage
       .from(this.productImagesBucket)
@@ -69,14 +78,14 @@ export class StorageService {
 
     if (error) {
       throw new InternalServerErrorException(
-        'No se pudo subir la imagen del producto.',
+        'No se pudo subir la imagen del ítem.',
       );
     }
 
     return imagePath;
   }
 
-  async deleteProductImage(imagePath: string): Promise<void> {
+  async deleteItemImage(imagePath: string): Promise<void> {
     const { error } = await this.supabase.storage
       .from(this.productImagesBucket)
       .remove([imagePath]);
@@ -114,5 +123,14 @@ export class StorageService {
     }
 
     throw new BadRequestException('Formato de imagen no soportado.');
+  }
+
+  private toSafePathSegment(value: string): string {
+    return value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
   }
 }
