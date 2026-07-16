@@ -71,6 +71,8 @@ model item {
   quantity                    Decimal?         @db.Decimal(10, 2)
   unit_id                     Int?
   units_per_pack              Int?
+  description                 String? @db.Text
+  dimensions                  Json?
   image_path                  String?
   metadata                    Json?
 

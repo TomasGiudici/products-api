@@ -1,28 +1,24 @@
-import { BrandResponseDto } from '../../brand/dto/brand-response.dto';
-import { CategoryResponseDto } from '../../category/dto/category-response.dto';
-import { IdentifierTypeResponseDto } from '../../identifier-type/dto/identifier-type-response.dto';
-import { ItemTypeResponseDto } from '../../item-type/dto/item-type-response.dto';
-import { UnitOfMeasureResponseDto } from '../../unit-of-measure/dto/unit-of-measure-response.dto';
+import { ItemDimensionsDto } from './item-dimensions.dto';
 
 export class ItemResponseDto {
-  id!: string;
+  id!: string | null;
 
-  identifierType!: IdentifierTypeResponseDto;
-  identifierValue!: string;
+  identifierType!: string | null;
+  identifierValue!: string | null;
 
-  itemType!: ItemTypeResponseDto | null;
+  itemType!: string | null;
 
-  name!: string;
+  name!: string | null;
+  description!: string | null;
 
-  brand!: BrandResponseDto | null;
-  category!: CategoryResponseDto | null;
+  brand!: string | null;
+  category!: string | null;
 
   quantity!: number | null;
-  unitsPerPack!: number | null;
-
-  unit!: UnitOfMeasureResponseDto | null;
+  unitAbbreviation!: string | null;
 
   imagePath!: string | null;
 
+  dimensions!: ItemDimensionsDto | null;
   metadata!: Record<string, unknown> | null;
 }

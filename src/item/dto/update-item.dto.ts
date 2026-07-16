@@ -9,7 +9,9 @@ import {
   Matches,
   MaxLength,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { ItemDimensionsDto } from './item-dimensions.dto';
 
 export class UpdateItemDto {
   @IsOptional()
@@ -101,4 +103,30 @@ export class UpdateItemDto {
     message: 'metadata debe ser un objeto JSON.',
   })
   metadata?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/\S/, {
+    message: 'description no puede contener solo espacios.',
+  })
+  @MaxLength(1000, {
+    message: 'description no puede superar los 1000 caracteres.',
+  })
+  description?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') {
+      return value as ItemDimensionsDto;
+    }
+
+    try {
+      return JSON.parse(value) as ItemDimensionsDto;
+    } catch {
+      return value;
+    }
+  })
+  @ValidateNested()
+  @Type(() => ItemDimensionsDto)
+  dimensions?: ItemDimensionsDto;
 }

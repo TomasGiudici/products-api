@@ -68,4 +68,17 @@ export class BrandService {
 
     return BrandMapper.toReference(createdBrand);
   }
+
+  async findByName(name: string): Promise<BrandResponseDto | null> {
+    const normalizedName = normalizeText(name);
+
+    const brand =
+      await this.brandRepository.findByNormalizedName(normalizedName);
+
+    if (!brand) {
+      return null;
+    }
+
+    return BrandMapper.toResponse(brand);
+  }
 }

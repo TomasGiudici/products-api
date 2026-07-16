@@ -58,6 +58,7 @@ export type ItemMinAggregateOutputType = {
   quantity: runtime.Decimal | null
   unit_id: number | null
   units_per_pack: number | null
+  description: string | null
   image_path: string | null
   created_at: Date | null
   updated_at: Date | null
@@ -75,6 +76,7 @@ export type ItemMaxAggregateOutputType = {
   quantity: runtime.Decimal | null
   unit_id: number | null
   units_per_pack: number | null
+  description: string | null
   image_path: string | null
   created_at: Date | null
   updated_at: Date | null
@@ -92,6 +94,8 @@ export type ItemCountAggregateOutputType = {
   quantity: number
   unit_id: number
   units_per_pack: number
+  description: number
+  dimensions: number
   image_path: number
   metadata: number
   created_at: number
@@ -132,6 +136,7 @@ export type ItemMinAggregateInputType = {
   quantity?: true
   unit_id?: true
   units_per_pack?: true
+  description?: true
   image_path?: true
   created_at?: true
   updated_at?: true
@@ -149,6 +154,7 @@ export type ItemMaxAggregateInputType = {
   quantity?: true
   unit_id?: true
   units_per_pack?: true
+  description?: true
   image_path?: true
   created_at?: true
   updated_at?: true
@@ -166,6 +172,8 @@ export type ItemCountAggregateInputType = {
   quantity?: true
   unit_id?: true
   units_per_pack?: true
+  description?: true
+  dimensions?: true
   image_path?: true
   metadata?: true
   created_at?: true
@@ -271,6 +279,8 @@ export type ItemGroupByOutputType = {
   quantity: runtime.Decimal | null
   unit_id: number | null
   units_per_pack: number | null
+  description: string | null
+  dimensions: runtime.JsonValue | null
   image_path: string | null
   metadata: runtime.JsonValue | null
   created_at: Date
@@ -312,6 +322,8 @@ export type itemWhereInput = {
   quantity?: Prisma.DecimalNullableFilter<"item"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.IntNullableFilter<"item"> | number | null
   units_per_pack?: Prisma.IntNullableFilter<"item"> | number | null
+  description?: Prisma.StringNullableFilter<"item"> | string | null
+  dimensions?: Prisma.JsonNullableFilter<"item">
   image_path?: Prisma.StringNullableFilter<"item"> | string | null
   metadata?: Prisma.JsonNullableFilter<"item">
   created_at?: Prisma.DateTimeFilter<"item"> | Date | string
@@ -335,6 +347,8 @@ export type itemOrderByWithRelationInput = {
   quantity?: Prisma.SortOrderInput | Prisma.SortOrder
   unit_id?: Prisma.SortOrderInput | Prisma.SortOrder
   units_per_pack?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
+  dimensions?: Prisma.SortOrderInput | Prisma.SortOrder
   image_path?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -362,6 +376,8 @@ export type itemWhereUniqueInput = Prisma.AtLeast<{
   quantity?: Prisma.DecimalNullableFilter<"item"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.IntNullableFilter<"item"> | number | null
   units_per_pack?: Prisma.IntNullableFilter<"item"> | number | null
+  description?: Prisma.StringNullableFilter<"item"> | string | null
+  dimensions?: Prisma.JsonNullableFilter<"item">
   image_path?: Prisma.StringNullableFilter<"item"> | string | null
   metadata?: Prisma.JsonNullableFilter<"item">
   created_at?: Prisma.DateTimeFilter<"item"> | Date | string
@@ -385,6 +401,8 @@ export type itemOrderByWithAggregationInput = {
   quantity?: Prisma.SortOrderInput | Prisma.SortOrder
   unit_id?: Prisma.SortOrderInput | Prisma.SortOrder
   units_per_pack?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
+  dimensions?: Prisma.SortOrderInput | Prisma.SortOrder
   image_path?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -411,6 +429,8 @@ export type itemScalarWhereWithAggregatesInput = {
   quantity?: Prisma.DecimalNullableWithAggregatesFilter<"item"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.IntNullableWithAggregatesFilter<"item"> | number | null
   units_per_pack?: Prisma.IntNullableWithAggregatesFilter<"item"> | number | null
+  description?: Prisma.StringNullableWithAggregatesFilter<"item"> | string | null
+  dimensions?: Prisma.JsonNullableWithAggregatesFilter<"item">
   image_path?: Prisma.StringNullableWithAggregatesFilter<"item"> | string | null
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"item">
   created_at?: Prisma.DateTimeWithAggregatesFilter<"item"> | Date | string
@@ -424,6 +444,8 @@ export type itemCreateInput = {
   name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -447,6 +469,8 @@ export type itemUncheckedCreateInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -460,6 +484,8 @@ export type itemUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -483,6 +509,8 @@ export type itemUncheckedUpdateInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -501,6 +529,8 @@ export type itemCreateManyInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -514,6 +544,8 @@ export type itemUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -532,6 +564,8 @@ export type itemUncheckedUpdateManyInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -565,6 +599,8 @@ export type itemCountOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   unit_id?: Prisma.SortOrder
   units_per_pack?: Prisma.SortOrder
+  description?: Prisma.SortOrder
+  dimensions?: Prisma.SortOrder
   image_path?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
@@ -593,6 +629,7 @@ export type itemMaxOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   unit_id?: Prisma.SortOrder
   units_per_pack?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   image_path?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -610,6 +647,7 @@ export type itemMinOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   unit_id?: Prisma.SortOrder
   units_per_pack?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   image_path?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -862,6 +900,8 @@ export type itemCreateWithoutIdentifier_typeInput = {
   name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -883,6 +923,8 @@ export type itemUncheckedCreateWithoutIdentifier_typeInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -930,6 +972,8 @@ export type itemScalarWhereInput = {
   quantity?: Prisma.DecimalNullableFilter<"item"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.IntNullableFilter<"item"> | number | null
   units_per_pack?: Prisma.IntNullableFilter<"item"> | number | null
+  description?: Prisma.StringNullableFilter<"item"> | string | null
+  dimensions?: Prisma.JsonNullableFilter<"item">
   image_path?: Prisma.StringNullableFilter<"item"> | string | null
   metadata?: Prisma.JsonNullableFilter<"item">
   created_at?: Prisma.DateTimeFilter<"item"> | Date | string
@@ -943,6 +987,8 @@ export type itemCreateWithoutItem_typeInput = {
   name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -964,6 +1010,8 @@ export type itemUncheckedCreateWithoutItem_typeInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1003,6 +1051,8 @@ export type itemCreateWithoutBrandInput = {
   name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1024,6 +1074,8 @@ export type itemUncheckedCreateWithoutBrandInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1063,6 +1115,8 @@ export type itemCreateWithoutCategoryInput = {
   name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1084,6 +1138,8 @@ export type itemUncheckedCreateWithoutCategoryInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1123,6 +1179,8 @@ export type itemCreateWithoutUnit_of_measureInput = {
   name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1144,6 +1202,8 @@ export type itemUncheckedCreateWithoutUnit_of_measureInput = {
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1187,6 +1247,8 @@ export type itemCreateManyIdentifier_typeInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1200,6 +1262,8 @@ export type itemUpdateWithoutIdentifier_typeInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1221,6 +1285,8 @@ export type itemUncheckedUpdateWithoutIdentifier_typeInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1238,6 +1304,8 @@ export type itemUncheckedUpdateManyWithoutIdentifier_typeInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1255,6 +1323,8 @@ export type itemCreateManyItem_typeInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1268,6 +1338,8 @@ export type itemUpdateWithoutItem_typeInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1289,6 +1361,8 @@ export type itemUncheckedUpdateWithoutItem_typeInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1306,6 +1380,8 @@ export type itemUncheckedUpdateManyWithoutItem_typeInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1323,6 +1399,8 @@ export type itemCreateManyBrandInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1336,6 +1414,8 @@ export type itemUpdateWithoutBrandInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1357,6 +1437,8 @@ export type itemUncheckedUpdateWithoutBrandInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1374,6 +1456,8 @@ export type itemUncheckedUpdateManyWithoutBrandInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1391,6 +1475,8 @@ export type itemCreateManyCategoryInput = {
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1404,6 +1490,8 @@ export type itemUpdateWithoutCategoryInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1425,6 +1513,8 @@ export type itemUncheckedUpdateWithoutCategoryInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1442,6 +1532,8 @@ export type itemUncheckedUpdateManyWithoutCategoryInput = {
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1459,6 +1551,8 @@ export type itemCreateManyUnit_of_measureInput = {
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
+  description?: string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
@@ -1472,6 +1566,8 @@ export type itemUpdateWithoutUnit_of_measureInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1493,6 +1589,8 @@ export type itemUncheckedUpdateWithoutUnit_of_measureInput = {
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1510,6 +1608,8 @@ export type itemUncheckedUpdateManyWithoutUnit_of_measureInput = {
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   image_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1530,6 +1630,8 @@ export type itemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   quantity?: boolean
   unit_id?: boolean
   units_per_pack?: boolean
+  description?: boolean
+  dimensions?: boolean
   image_path?: boolean
   metadata?: boolean
   created_at?: boolean
@@ -1553,6 +1655,8 @@ export type itemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   quantity?: boolean
   unit_id?: boolean
   units_per_pack?: boolean
+  description?: boolean
+  dimensions?: boolean
   image_path?: boolean
   metadata?: boolean
   created_at?: boolean
@@ -1576,6 +1680,8 @@ export type itemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   quantity?: boolean
   unit_id?: boolean
   units_per_pack?: boolean
+  description?: boolean
+  dimensions?: boolean
   image_path?: boolean
   metadata?: boolean
   created_at?: boolean
@@ -1599,13 +1705,15 @@ export type itemSelectScalar = {
   quantity?: boolean
   unit_id?: boolean
   units_per_pack?: boolean
+  description?: boolean
+  dimensions?: boolean
   image_path?: boolean
   metadata?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type itemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "identifier_type_id" | "identifier_value" | "normalized_identifier_value" | "item_type_id" | "name" | "brand_id" | "category_id" | "quantity" | "unit_id" | "units_per_pack" | "image_path" | "metadata" | "created_at" | "updated_at", ExtArgs["result"]["item"]>
+export type itemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "identifier_type_id" | "identifier_value" | "normalized_identifier_value" | "item_type_id" | "name" | "brand_id" | "category_id" | "quantity" | "unit_id" | "units_per_pack" | "description" | "dimensions" | "image_path" | "metadata" | "created_at" | "updated_at", ExtArgs["result"]["item"]>
 export type itemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   identifier_type?: boolean | Prisma.identifier_typeDefaultArgs<ExtArgs>
   item_type?: boolean | Prisma.item$item_typeArgs<ExtArgs>
@@ -1649,6 +1757,8 @@ export type $itemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     quantity: runtime.Decimal | null
     unit_id: number | null
     units_per_pack: number | null
+    description: string | null
+    dimensions: runtime.JsonValue | null
     image_path: string | null
     metadata: runtime.JsonValue | null
     created_at: Date
@@ -2092,6 +2202,8 @@ export interface itemFieldRefs {
   readonly quantity: Prisma.FieldRef<"item", 'Decimal'>
   readonly unit_id: Prisma.FieldRef<"item", 'Int'>
   readonly units_per_pack: Prisma.FieldRef<"item", 'Int'>
+  readonly description: Prisma.FieldRef<"item", 'String'>
+  readonly dimensions: Prisma.FieldRef<"item", 'Json'>
   readonly image_path: Prisma.FieldRef<"item", 'String'>
   readonly metadata: Prisma.FieldRef<"item", 'Json'>
   readonly created_at: Prisma.FieldRef<"item", 'DateTime'>

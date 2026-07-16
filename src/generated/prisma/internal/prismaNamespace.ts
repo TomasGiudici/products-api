@@ -945,6 +945,8 @@ export const ItemScalarFieldEnum = {
   quantity: 'quantity',
   unit_id: 'unit_id',
   units_per_pack: 'units_per_pack',
+  description: 'description',
+  dimensions: 'dimensions',
   image_path: 'image_path',
   metadata: 'metadata',
   created_at: 'created_at',

@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -13,9 +14,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ApiKeyGuard } from '../common/guards/api-key.guard';
 import { CreateItemDto } from './dto/create-item.dto';
+import { FilterItemsDto } from './dto/filter-items.dto';
 import { FindItemByIdDto } from './dto/find-item-by-id.dto';
 import { FindItemByIdentifierDto } from './dto/find-item-by-identifier.dto';
 import { ItemResponseDto } from './dto/item-response.dto';
+import { ItemSummaryResponseDto } from './dto/item-summary-response.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemService } from './item.service';
 
@@ -56,6 +59,19 @@ export class ItemController {
     @UploadedFile() image?: Express.Multer.File,
   ): Promise<ItemResponseDto> {
     return this.itemService.updateItem(findItemByIdDto, updateItemDto, image);
+  }
+
+  @Get()
+  findAll(@Query() filterItemsDto: FilterItemsDto): Promise<ItemResponseDto[]> {
+    return this.itemService.findAll(filterItemsDto);
+  }
+
+  @Get('identifier/:identifierTypeCode/:identifierValue/summary')
+  findSummaryByIdentifier(
+    @Param()
+    findItemByIdentifierDto: FindItemByIdentifierDto,
+  ): Promise<ItemSummaryResponseDto> {
+    return this.itemService.findSummaryByIdentifier(findItemByIdentifierDto);
   }
 
   @Get('identifier/:identifierTypeCode/:identifierValue')

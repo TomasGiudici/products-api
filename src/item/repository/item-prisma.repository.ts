@@ -6,7 +6,10 @@ import type {
   CreateItemPersistenceData,
   UpdateItemPersistenceData,
 } from '../interface/item-persistence-data.interface';
-import type { IItemRepository } from './item.repository.interface';
+import type {
+  FindItemsFilters,
+  IItemRepository,
+} from './item.repository.interface';
 
 @Injectable()
 export class ItemPrismaRepository implements IItemRepository {
@@ -46,6 +49,27 @@ export class ItemPrismaRepository implements IItemRepository {
     return this.toItemDetail(item);
   }
 
+  async findMany(filters: FindItemsFilters): Promise<ItemDetail[]> {
+    const where: Prisma.itemWhereInput = {};
+
+    if (filters.brand_id !== undefined) {
+      where.brand_id = filters.brand_id;
+    }
+
+    if (filters.category_id !== undefined) {
+      where.category_id = filters.category_id;
+    }
+
+    const items = await this.prisma.item.findMany({
+      where,
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return items.map((item) => this.toItemDetail(item));
+  }
+
   async create(data: CreateItemPersistenceData): Promise<ItemDetail> {
     const item = await this.prisma.item.create({
       data: {
@@ -56,6 +80,7 @@ export class ItemPrismaRepository implements IItemRepository {
         item_type_id: data.item_type_id,
 
         name: data.name,
+        description: data.description,
 
         brand_id: data.brand_id,
         category_id: data.category_id,
@@ -66,6 +91,7 @@ export class ItemPrismaRepository implements IItemRepository {
 
         image_path: data.image_path,
 
+        dimensions: data.dimensions as Prisma.InputJsonValue | undefined,
         metadata: data.metadata as Prisma.InputJsonValue | undefined,
       },
     });
@@ -85,6 +111,7 @@ export class ItemPrismaRepository implements IItemRepository {
         item_type_id: data.item_type_id,
 
         name: data.name,
+        description: data.description,
 
         brand_id: data.brand_id,
         category_id: data.category_id,
@@ -95,6 +122,7 @@ export class ItemPrismaRepository implements IItemRepository {
 
         image_path: data.image_path,
 
+        dimensions: data.dimensions as Prisma.InputJsonValue | undefined,
         metadata: data.metadata as Prisma.InputJsonValue | undefined,
       },
     });
@@ -112,6 +140,7 @@ export class ItemPrismaRepository implements IItemRepository {
     item_type_id: number | null;
 
     name: string;
+    description: string | null;
 
     brand_id: number | null;
     category_id: number | null;
@@ -122,6 +151,7 @@ export class ItemPrismaRepository implements IItemRepository {
 
     image_path: string | null;
 
+    dimensions: Prisma.JsonValue | null;
     metadata: Prisma.JsonValue | null;
   }): ItemDetail {
     return {
@@ -134,6 +164,7 @@ export class ItemPrismaRepository implements IItemRepository {
       itemTypeId: item.item_type_id,
 
       name: item.name,
+      description: item.description,
 
       brandId: item.brand_id,
       categoryId: item.category_id,
@@ -144,8 +175,23 @@ export class ItemPrismaRepository implements IItemRepository {
 
       imagePath: item.image_path,
 
+      dimensions: this.toDimensions(item.dimensions),
       metadata: this.toMetadata(item.metadata),
     };
+  }
+
+  private toDimensions(
+    dimensions: Prisma.JsonValue | null,
+  ): ItemDetail['dimensions'] {
+    if (
+      dimensions &&
+      typeof dimensions === 'object' &&
+      !Array.isArray(dimensions)
+    ) {
+      return dimensions;
+    }
+
+    return null;
   }
 
   private toMetadata(

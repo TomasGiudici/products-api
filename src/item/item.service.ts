@@ -16,9 +16,11 @@ import { StorageService } from '../storage/storage.service';
 import { UnitOfMeasureResponseDto } from '../unit-of-measure/dto/unit-of-measure-response.dto';
 import { UnitOfMeasureService } from '../unit-of-measure/unit-of-measure.service';
 import { CreateItemDto } from './dto/create-item.dto';
+import { FilterItemsDto } from './dto/filter-items.dto';
 import { FindItemByIdDto } from './dto/find-item-by-id.dto';
 import { FindItemByIdentifierDto } from './dto/find-item-by-identifier.dto';
 import { ItemResponseDto } from './dto/item-response.dto';
+import { ItemSummaryResponseDto } from './dto/item-summary-response.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import type { ItemDetail } from './interface/item-detail.interface';
 import { ItemMapper } from './mapper/item.mapper';
@@ -223,6 +225,33 @@ export class ItemService {
     }
   }
 
+  async findAll(filterItemsDto: FilterItemsDto): Promise<ItemResponseDto[]> {
+    const filterData = ItemMapper.toFilterData(filterItemsDto);
+
+    const brand = filterData.brandName
+      ? await this.brandService.findByName(filterData.brandName)
+      : null;
+
+    if (filterData.brandName && !brand) {
+      return [];
+    }
+
+    const category = filterData.categoryName
+      ? await this.categoryService.findByName(filterData.categoryName)
+      : null;
+
+    if (filterData.categoryName && !category) {
+      return [];
+    }
+
+    const items = await this.itemRepository.findMany({
+      brand_id: brand?.id,
+      category_id: category?.id,
+    });
+
+    return Promise.all(items.map((item) => this.buildResponse(item)));
+  }
+
   async findById(findItemByIdDto: FindItemByIdDto): Promise<ItemResponseDto> {
     const item = await this.itemRepository.findById(findItemByIdDto.id);
 
@@ -236,6 +265,29 @@ export class ItemService {
   async findByIdentifier(
     findItemByIdentifierDto: FindItemByIdentifierDto,
   ): Promise<ItemResponseDto> {
+    const item = await this.findItemDetailByIdentifier(findItemByIdentifierDto);
+
+    return this.buildResponse(item);
+  }
+
+  async findSummaryByIdentifier(
+    findItemByIdentifierDto: FindItemByIdentifierDto,
+  ): Promise<ItemSummaryResponseDto> {
+    const item = await this.findItemDetailByIdentifier(findItemByIdentifierDto);
+
+    const brand: BrandResponseDto | null =
+      item.brandId !== null
+        ? await this.brandService.findById(item.brandId)
+        : null;
+
+    return ItemMapper.toSummaryResponse(item, {
+      brand,
+    });
+  }
+
+  private async findItemDetailByIdentifier(
+    findItemByIdentifierDto: FindItemByIdentifierDto,
+  ): Promise<ItemDetail> {
     const identifierData = ItemMapper.toIdentifierData(findItemByIdentifierDto);
 
     const identifierType = await this.identifierTypeService.findByCode(
@@ -255,7 +307,7 @@ export class ItemService {
       throw new NotFoundException('Ítem no encontrado.');
     }
 
-    return this.buildResponse(item);
+    return item;
   }
 
   private async buildResponse(item: ItemDetail): Promise<ItemResponseDto> {

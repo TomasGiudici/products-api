@@ -1,3 +1,5 @@
+import { ItemDimensionsDto } from '../dto/item-dimensions.dto';
+
 export interface CreateItemPersistenceData {
   identifier_type_id: number;
   identifier_value: string;
@@ -6,6 +8,7 @@ export interface CreateItemPersistenceData {
   item_type_id?: number;
 
   name: string;
+  description?: string;
 
   brand_id?: number;
   category_id?: number;
@@ -16,6 +19,7 @@ export interface CreateItemPersistenceData {
 
   image_path?: string;
 
+  dimensions?: ItemDimensionsDto;
   metadata?: Record<string, unknown>;
 }
 
@@ -23,6 +27,7 @@ export interface UpdateItemPersistenceData {
   item_type_id?: number;
 
   name?: string;
+  description?: string;
 
   brand_id?: number;
   category_id?: number;
@@ -33,5 +38,6 @@ export interface UpdateItemPersistenceData {
 
   image_path?: string;
 
+  dimensions?: ItemDimensionsDto;
   metadata?: Record<string, unknown>;
 }

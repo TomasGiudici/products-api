@@ -1,3 +1,5 @@
+import { ItemDimensionsDto } from '../dto/item-dimensions.dto';
+
 export interface ItemDetail {
   id: string;
 
@@ -8,6 +10,7 @@ export interface ItemDetail {
   itemTypeId: number | null;
 
   name: string;
+  description: string | null;
 
   brandId: number | null;
   categoryId: number | null;
@@ -18,5 +21,6 @@ export interface ItemDetail {
 
   imagePath: string | null;
 
+  dimensions: ItemDimensionsDto | null;
   metadata: Record<string, unknown> | null;
 }

@@ -1,12 +1,15 @@
-import { normalizeIdentifierValue } from '../../common/utils/normalize-identifier-value.util';
 import { BrandResponseDto } from '../../brand/dto/brand-response.dto';
 import { CategoryResponseDto } from '../../category/dto/category-response.dto';
+import { normalizeIdentifierValue } from '../../common/utils/normalize-identifier-value.util';
 import { IdentifierTypeResponseDto } from '../../identifier-type/dto/identifier-type-response.dto';
 import { ItemTypeResponseDto } from '../../item-type/dto/item-type-response.dto';
 import { UnitOfMeasureResponseDto } from '../../unit-of-measure/dto/unit-of-measure-response.dto';
 import { CreateItemDto } from '../dto/create-item.dto';
+import { FilterItemsDto } from '../dto/filter-items.dto';
 import { FindItemByIdentifierDto } from '../dto/find-item-by-identifier.dto';
+import type { ItemDimensionsDto } from '../dto/item-dimensions.dto';
 import { ItemResponseDto } from '../dto/item-response.dto';
+import { ItemSummaryResponseDto } from '../dto/item-summary-response.dto';
 import { UpdateItemDto } from '../dto/update-item.dto';
 import type { ItemDetail } from '../interface/item-detail.interface';
 import type {
@@ -22,6 +25,7 @@ export interface CreateItemData {
   itemTypeCode?: string;
 
   name: string;
+  description?: string;
 
   brandName?: string;
   categoryName?: string;
@@ -30,6 +34,7 @@ export interface CreateItemData {
   unitAbbreviation?: string;
   unitsPerPack?: number;
 
+  dimensions?: ItemDimensionsDto;
   metadata?: Record<string, unknown>;
 }
 
@@ -37,6 +42,7 @@ export interface UpdateItemData {
   itemTypeCode?: string;
 
   name?: string;
+  description?: string;
 
   brandName?: string;
   categoryName?: string;
@@ -45,7 +51,13 @@ export interface UpdateItemData {
   unitAbbreviation?: string;
   unitsPerPack?: number;
 
+  dimensions?: ItemDimensionsDto;
   metadata?: Record<string, unknown>;
+}
+
+export interface FilterItemsData {
+  brandName?: string;
+  categoryName?: string;
 }
 
 export interface CreateItemRelationIds {
@@ -64,11 +76,15 @@ export interface UpdateItemRelationIds {
 }
 
 export interface ItemResponseRelations {
-  identifierType: IdentifierTypeResponseDto;
+  identifierType: IdentifierTypeResponseDto | null;
   itemType: ItemTypeResponseDto | null;
   brand: BrandResponseDto | null;
   category: CategoryResponseDto | null;
   unit: UnitOfMeasureResponseDto | null;
+}
+
+export interface ItemSummaryResponseRelations {
+  brand: BrandResponseDto | null;
 }
 
 export class ItemMapper {
@@ -83,6 +99,7 @@ export class ItemMapper {
       itemTypeCode: createItemDto.itemTypeCode?.trim(),
 
       name: createItemDto.name.trim(),
+      description: createItemDto.description?.trim(),
 
       brandName: createItemDto.brandName?.trim(),
       categoryName: createItemDto.categoryName?.trim(),
@@ -91,6 +108,7 @@ export class ItemMapper {
       unitAbbreviation: createItemDto.unitAbbreviation?.trim(),
       unitsPerPack: createItemDto.unitsPerPack,
 
+      dimensions: createItemDto.dimensions,
       metadata: createItemDto.metadata,
     };
   }
@@ -100,6 +118,7 @@ export class ItemMapper {
       itemTypeCode: updateItemDto.itemTypeCode?.trim(),
 
       name: updateItemDto.name?.trim(),
+      description: updateItemDto.description?.trim(),
 
       brandName: updateItemDto.brandName?.trim(),
       categoryName: updateItemDto.categoryName?.trim(),
@@ -108,6 +127,7 @@ export class ItemMapper {
       unitAbbreviation: updateItemDto.unitAbbreviation?.trim(),
       unitsPerPack: updateItemDto.unitsPerPack,
 
+      dimensions: updateItemDto.dimensions,
       metadata: updateItemDto.metadata,
     };
   }
@@ -123,6 +143,13 @@ export class ItemMapper {
       identifierTypeCode: findItemByIdentifierDto.identifierTypeCode.trim(),
       identifierValue,
       normalizedIdentifierValue: normalizeIdentifierValue(identifierValue),
+    };
+  }
+
+  static toFilterData(filterItemsDto: FilterItemsDto): FilterItemsData {
+    return {
+      brandName: filterItemsDto.brandName?.trim(),
+      categoryName: filterItemsDto.categoryName?.trim(),
     };
   }
 
@@ -143,6 +170,7 @@ export class ItemMapper {
       item_type_id: relationIds.itemTypeId,
 
       name: createItemData.name,
+      description: createItemData.description,
 
       brand_id: relationIds.brandId,
       category_id: relationIds.categoryId,
@@ -153,6 +181,7 @@ export class ItemMapper {
 
       image_path: imagePath,
 
+      dimensions: createItemData.dimensions,
       metadata: createItemData.metadata,
     };
   }
@@ -170,6 +199,10 @@ export class ItemMapper {
 
     if (updateItemData.name !== undefined) {
       persistenceData.name = updateItemData.name;
+    }
+
+    if (updateItemData.description !== undefined) {
+      persistenceData.description = updateItemData.description;
     }
 
     if (relationIds.brandId !== undefined) {
@@ -196,6 +229,10 @@ export class ItemMapper {
       persistenceData.image_path = imagePath;
     }
 
+    if (updateItemData.dimensions !== undefined) {
+      persistenceData.dimensions = updateItemData.dimensions;
+    }
+
     if (updateItemData.metadata !== undefined) {
       persistenceData.metadata = updateItemData.metadata;
     }
@@ -208,26 +245,37 @@ export class ItemMapper {
     relations: ItemResponseRelations,
   ): ItemResponseDto {
     return {
-      id: item.id,
+      id: item.id ?? null,
 
-      identifierType: relations.identifierType,
-      identifierValue: item.identifierValue,
+      identifierType: relations.identifierType?.name ?? null,
+      identifierValue: item.identifierValue ?? null,
 
-      itemType: relations.itemType,
+      itemType: relations.itemType?.name ?? null,
 
-      name: item.name,
+      name: item.name ?? null,
+      description: item.description ?? null,
 
-      brand: relations.brand,
-      category: relations.category,
+      brand: relations.brand?.name ?? null,
+      category: relations.category?.name ?? null,
 
-      quantity: item.quantity,
-      unitsPerPack: item.unitsPerPack,
+      quantity: item.quantity ?? null,
+      unitAbbreviation: relations.unit?.abbreviation ?? null,
 
-      unit: relations.unit,
+      imagePath: item.imagePath ?? null,
 
-      imagePath: item.imagePath,
+      dimensions: item.dimensions ?? null,
+      metadata: item.metadata ?? null,
+    };
+  }
 
-      metadata: item.metadata,
+  static toSummaryResponse(
+    item: ItemDetail,
+    relations: ItemSummaryResponseRelations,
+  ): ItemSummaryResponseDto {
+    return {
+      id: item.id ?? null,
+      name: item.name ?? null,
+      brand: relations.brand?.name ?? null,
     };
   }
 }
