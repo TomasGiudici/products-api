@@ -53,6 +53,7 @@ export type ItemMinAggregateOutputType = {
   normalized_identifier_value: string | null
   item_type_id: number | null
   name: string | null
+  normalized_name: string | null
   brand_id: number | null
   category_id: number | null
   quantity: runtime.Decimal | null
@@ -71,6 +72,7 @@ export type ItemMaxAggregateOutputType = {
   normalized_identifier_value: string | null
   item_type_id: number | null
   name: string | null
+  normalized_name: string | null
   brand_id: number | null
   category_id: number | null
   quantity: runtime.Decimal | null
@@ -89,6 +91,7 @@ export type ItemCountAggregateOutputType = {
   normalized_identifier_value: number
   item_type_id: number
   name: number
+  normalized_name: number
   brand_id: number
   category_id: number
   quantity: number
@@ -131,6 +134,7 @@ export type ItemMinAggregateInputType = {
   normalized_identifier_value?: true
   item_type_id?: true
   name?: true
+  normalized_name?: true
   brand_id?: true
   category_id?: true
   quantity?: true
@@ -149,6 +153,7 @@ export type ItemMaxAggregateInputType = {
   normalized_identifier_value?: true
   item_type_id?: true
   name?: true
+  normalized_name?: true
   brand_id?: true
   category_id?: true
   quantity?: true
@@ -167,6 +172,7 @@ export type ItemCountAggregateInputType = {
   normalized_identifier_value?: true
   item_type_id?: true
   name?: true
+  normalized_name?: true
   brand_id?: true
   category_id?: true
   quantity?: true
@@ -274,6 +280,7 @@ export type ItemGroupByOutputType = {
   normalized_identifier_value: string
   item_type_id: number | null
   name: string
+  normalized_name: string
   brand_id: number | null
   category_id: number | null
   quantity: runtime.Decimal | null
@@ -317,6 +324,7 @@ export type itemWhereInput = {
   normalized_identifier_value?: Prisma.StringFilter<"item"> | string
   item_type_id?: Prisma.IntNullableFilter<"item"> | number | null
   name?: Prisma.StringFilter<"item"> | string
+  normalized_name?: Prisma.StringFilter<"item"> | string
   brand_id?: Prisma.IntNullableFilter<"item"> | number | null
   category_id?: Prisma.IntNullableFilter<"item"> | number | null
   quantity?: Prisma.DecimalNullableFilter<"item"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -342,6 +350,7 @@ export type itemOrderByWithRelationInput = {
   normalized_identifier_value?: Prisma.SortOrder
   item_type_id?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrder
+  normalized_name?: Prisma.SortOrder
   brand_id?: Prisma.SortOrderInput | Prisma.SortOrder
   category_id?: Prisma.SortOrderInput | Prisma.SortOrder
   quantity?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -371,6 +380,7 @@ export type itemWhereUniqueInput = Prisma.AtLeast<{
   normalized_identifier_value?: Prisma.StringFilter<"item"> | string
   item_type_id?: Prisma.IntNullableFilter<"item"> | number | null
   name?: Prisma.StringFilter<"item"> | string
+  normalized_name?: Prisma.StringFilter<"item"> | string
   brand_id?: Prisma.IntNullableFilter<"item"> | number | null
   category_id?: Prisma.IntNullableFilter<"item"> | number | null
   quantity?: Prisma.DecimalNullableFilter<"item"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -396,6 +406,7 @@ export type itemOrderByWithAggregationInput = {
   normalized_identifier_value?: Prisma.SortOrder
   item_type_id?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrder
+  normalized_name?: Prisma.SortOrder
   brand_id?: Prisma.SortOrderInput | Prisma.SortOrder
   category_id?: Prisma.SortOrderInput | Prisma.SortOrder
   quantity?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -424,6 +435,7 @@ export type itemScalarWhereWithAggregatesInput = {
   normalized_identifier_value?: Prisma.StringWithAggregatesFilter<"item"> | string
   item_type_id?: Prisma.IntNullableWithAggregatesFilter<"item"> | number | null
   name?: Prisma.StringWithAggregatesFilter<"item"> | string
+  normalized_name?: Prisma.StringWithAggregatesFilter<"item"> | string
   brand_id?: Prisma.IntNullableWithAggregatesFilter<"item"> | number | null
   category_id?: Prisma.IntNullableWithAggregatesFilter<"item"> | number | null
   quantity?: Prisma.DecimalNullableWithAggregatesFilter<"item"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -442,6 +454,7 @@ export type itemCreateInput = {
   identifier_value: string
   normalized_identifier_value: string
   name: string
+  normalized_name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
   description?: string | null
@@ -464,6 +477,7 @@ export type itemUncheckedCreateInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   brand_id?: number | null
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -482,6 +496,7 @@ export type itemUpdateInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -504,6 +519,7 @@ export type itemUncheckedUpdateInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -524,6 +540,7 @@ export type itemCreateManyInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   brand_id?: number | null
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -542,6 +559,7 @@ export type itemUpdateManyMutationInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -559,6 +577,7 @@ export type itemUncheckedUpdateManyInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -594,6 +613,7 @@ export type itemCountOrderByAggregateInput = {
   normalized_identifier_value?: Prisma.SortOrder
   item_type_id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  normalized_name?: Prisma.SortOrder
   brand_id?: Prisma.SortOrder
   category_id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
@@ -624,6 +644,7 @@ export type itemMaxOrderByAggregateInput = {
   normalized_identifier_value?: Prisma.SortOrder
   item_type_id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  normalized_name?: Prisma.SortOrder
   brand_id?: Prisma.SortOrder
   category_id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
@@ -642,6 +663,7 @@ export type itemMinOrderByAggregateInput = {
   normalized_identifier_value?: Prisma.SortOrder
   item_type_id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  normalized_name?: Prisma.SortOrder
   brand_id?: Prisma.SortOrder
   category_id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
@@ -898,6 +920,7 @@ export type itemCreateWithoutIdentifier_typeInput = {
   identifier_value: string
   normalized_identifier_value: string
   name: string
+  normalized_name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
   description?: string | null
@@ -918,6 +941,7 @@ export type itemUncheckedCreateWithoutIdentifier_typeInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   brand_id?: number | null
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -967,6 +991,7 @@ export type itemScalarWhereInput = {
   normalized_identifier_value?: Prisma.StringFilter<"item"> | string
   item_type_id?: Prisma.IntNullableFilter<"item"> | number | null
   name?: Prisma.StringFilter<"item"> | string
+  normalized_name?: Prisma.StringFilter<"item"> | string
   brand_id?: Prisma.IntNullableFilter<"item"> | number | null
   category_id?: Prisma.IntNullableFilter<"item"> | number | null
   quantity?: Prisma.DecimalNullableFilter<"item"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -985,6 +1010,7 @@ export type itemCreateWithoutItem_typeInput = {
   identifier_value: string
   normalized_identifier_value: string
   name: string
+  normalized_name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
   description?: string | null
@@ -1005,6 +1031,7 @@ export type itemUncheckedCreateWithoutItem_typeInput = {
   identifier_value: string
   normalized_identifier_value: string
   name: string
+  normalized_name: string
   brand_id?: number | null
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1049,6 +1076,7 @@ export type itemCreateWithoutBrandInput = {
   identifier_value: string
   normalized_identifier_value: string
   name: string
+  normalized_name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
   description?: string | null
@@ -1070,6 +1098,7 @@ export type itemUncheckedCreateWithoutBrandInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
@@ -1113,6 +1142,7 @@ export type itemCreateWithoutCategoryInput = {
   identifier_value: string
   normalized_identifier_value: string
   name: string
+  normalized_name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
   description?: string | null
@@ -1134,6 +1164,7 @@ export type itemUncheckedCreateWithoutCategoryInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   brand_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
@@ -1177,6 +1208,7 @@ export type itemCreateWithoutUnit_of_measureInput = {
   identifier_value: string
   normalized_identifier_value: string
   name: string
+  normalized_name: string
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: number | null
   description?: string | null
@@ -1198,6 +1230,7 @@ export type itemUncheckedCreateWithoutUnit_of_measureInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   brand_id?: number | null
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1242,6 +1275,7 @@ export type itemCreateManyIdentifier_typeInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   brand_id?: number | null
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1260,6 +1294,7 @@ export type itemUpdateWithoutIdentifier_typeInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1280,6 +1315,7 @@ export type itemUncheckedUpdateWithoutIdentifier_typeInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1299,6 +1335,7 @@ export type itemUncheckedUpdateManyWithoutIdentifier_typeInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1318,6 +1355,7 @@ export type itemCreateManyItem_typeInput = {
   identifier_value: string
   normalized_identifier_value: string
   name: string
+  normalized_name: string
   brand_id?: number | null
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1336,6 +1374,7 @@ export type itemUpdateWithoutItem_typeInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1356,6 +1395,7 @@ export type itemUncheckedUpdateWithoutItem_typeInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1375,6 +1415,7 @@ export type itemUncheckedUpdateManyWithoutItem_typeInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1395,6 +1436,7 @@ export type itemCreateManyBrandInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
@@ -1412,6 +1454,7 @@ export type itemUpdateWithoutBrandInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1433,6 +1476,7 @@ export type itemUncheckedUpdateWithoutBrandInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1452,6 +1496,7 @@ export type itemUncheckedUpdateManyWithoutBrandInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1471,6 +1516,7 @@ export type itemCreateManyCategoryInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   brand_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: number | null
@@ -1488,6 +1534,7 @@ export type itemUpdateWithoutCategoryInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1509,6 +1556,7 @@ export type itemUncheckedUpdateWithoutCategoryInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1528,6 +1576,7 @@ export type itemUncheckedUpdateManyWithoutCategoryInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unit_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1547,6 +1596,7 @@ export type itemCreateManyUnit_of_measureInput = {
   normalized_identifier_value: string
   item_type_id?: number | null
   name: string
+  normalized_name: string
   brand_id?: number | null
   category_id?: number | null
   quantity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1564,6 +1614,7 @@ export type itemUpdateWithoutUnit_of_measureInput = {
   identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   units_per_pack?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1585,6 +1636,7 @@ export type itemUncheckedUpdateWithoutUnit_of_measureInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1604,6 +1656,7 @@ export type itemUncheckedUpdateManyWithoutUnit_of_measureInput = {
   normalized_identifier_value?: Prisma.StringFieldUpdateOperationsInput | string
   item_type_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalized_name?: Prisma.StringFieldUpdateOperationsInput | string
   brand_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   category_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   quantity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1625,6 +1678,7 @@ export type itemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   normalized_identifier_value?: boolean
   item_type_id?: boolean
   name?: boolean
+  normalized_name?: boolean
   brand_id?: boolean
   category_id?: boolean
   quantity?: boolean
@@ -1650,6 +1704,7 @@ export type itemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   normalized_identifier_value?: boolean
   item_type_id?: boolean
   name?: boolean
+  normalized_name?: boolean
   brand_id?: boolean
   category_id?: boolean
   quantity?: boolean
@@ -1675,6 +1730,7 @@ export type itemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   normalized_identifier_value?: boolean
   item_type_id?: boolean
   name?: boolean
+  normalized_name?: boolean
   brand_id?: boolean
   category_id?: boolean
   quantity?: boolean
@@ -1700,6 +1756,7 @@ export type itemSelectScalar = {
   normalized_identifier_value?: boolean
   item_type_id?: boolean
   name?: boolean
+  normalized_name?: boolean
   brand_id?: boolean
   category_id?: boolean
   quantity?: boolean
@@ -1713,7 +1770,7 @@ export type itemSelectScalar = {
   updated_at?: boolean
 }
 
-export type itemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "identifier_type_id" | "identifier_value" | "normalized_identifier_value" | "item_type_id" | "name" | "brand_id" | "category_id" | "quantity" | "unit_id" | "units_per_pack" | "description" | "dimensions" | "image_path" | "metadata" | "created_at" | "updated_at", ExtArgs["result"]["item"]>
+export type itemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "identifier_type_id" | "identifier_value" | "normalized_identifier_value" | "item_type_id" | "name" | "normalized_name" | "brand_id" | "category_id" | "quantity" | "unit_id" | "units_per_pack" | "description" | "dimensions" | "image_path" | "metadata" | "created_at" | "updated_at", ExtArgs["result"]["item"]>
 export type itemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   identifier_type?: boolean | Prisma.identifier_typeDefaultArgs<ExtArgs>
   item_type?: boolean | Prisma.item$item_typeArgs<ExtArgs>
@@ -1752,6 +1809,7 @@ export type $itemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     normalized_identifier_value: string
     item_type_id: number | null
     name: string
+    normalized_name: string
     brand_id: number | null
     category_id: number | null
     quantity: runtime.Decimal | null
@@ -2197,6 +2255,7 @@ export interface itemFieldRefs {
   readonly normalized_identifier_value: Prisma.FieldRef<"item", 'String'>
   readonly item_type_id: Prisma.FieldRef<"item", 'Int'>
   readonly name: Prisma.FieldRef<"item", 'String'>
+  readonly normalized_name: Prisma.FieldRef<"item", 'String'>
   readonly brand_id: Prisma.FieldRef<"item", 'Int'>
   readonly category_id: Prisma.FieldRef<"item", 'Int'>
   readonly quantity: Prisma.FieldRef<"item", 'Decimal'>

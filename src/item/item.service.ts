@@ -25,6 +25,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import type { ItemDetail } from './interface/item-detail.interface';
 import { ItemMapper } from './mapper/item.mapper';
 import type { IItemRepository } from './repository/item.repository.interface';
+import { ItemCsvExporter } from './exporter/item-csv.exporter';
 
 @Injectable()
 export class ItemService {
@@ -228,6 +229,10 @@ export class ItemService {
   async findAll(filterItemsDto: FilterItemsDto): Promise<ItemResponseDto[]> {
     const filterData = ItemMapper.toFilterData(filterItemsDto);
 
+    if (filterData.search && !filterData.normalizedSearch) {
+      return [];
+    }
+
     const brand = filterData.brandName
       ? await this.brandService.findByName(filterData.brandName)
       : null;
@@ -247,6 +252,7 @@ export class ItemService {
     const items = await this.itemRepository.findMany({
       brand_id: brand?.id,
       category_id: category?.id,
+      normalized_name: filterData.normalizedSearch,
     });
 
     return Promise.all(items.map((item) => this.buildResponse(item)));
@@ -342,5 +348,11 @@ export class ItemService {
       category,
       unit,
     });
+  }
+
+  async findAllAsCsv(filterItemsDto: FilterItemsDto): Promise<string> {
+    const items = await this.findAll(filterItemsDto);
+
+    return ItemCsvExporter.export(items);
   }
 }

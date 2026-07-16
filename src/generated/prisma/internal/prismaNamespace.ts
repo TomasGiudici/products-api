@@ -940,6 +940,7 @@ export const ItemScalarFieldEnum = {
   normalized_identifier_value: 'normalized_identifier_value',
   item_type_id: 'item_type_id',
   name: 'name',
+  normalized_name: 'normalized_name',
   brand_id: 'brand_id',
   category_id: 'category_id',
   quantity: 'quantity',

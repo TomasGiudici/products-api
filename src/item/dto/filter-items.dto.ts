@@ -20,4 +20,14 @@ export class FilterItemsDto {
     message: 'categoryName no puede superar los 100 caracteres.',
   })
   categoryName?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/\S/, {
+    message: 'search no puede contener solo espacios.',
+  })
+  @MaxLength(255, {
+    message: 'search no puede superar los 255 caracteres.',
+  })
+  search?: string;
 }

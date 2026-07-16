@@ -8,6 +8,7 @@ export interface CreateItemPersistenceData {
   item_type_id?: number;
 
   name: string;
+  normalized_name: string;
   description?: string;
 
   brand_id?: number;
@@ -27,6 +28,7 @@ export interface UpdateItemPersistenceData {
   item_type_id?: number;
 
   name?: string;
+  normalized_name?: string;
   description?: string;
 
   brand_id?: number;

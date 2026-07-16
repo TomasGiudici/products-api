@@ -7,6 +7,7 @@ import type { ItemDetail } from '../interface/item-detail.interface';
 export interface FindItemsFilters {
   brand_id?: number;
   category_id?: number;
+  normalized_name?: string;
 }
 
 export interface IItemRepository {

@@ -2,15 +2,18 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import { memoryStorage } from 'multer';
 import { ApiKeyGuard } from '../common/guards/api-key.guard';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -62,7 +65,25 @@ export class ItemController {
   }
 
   @Get()
-  findAll(@Query() filterItemsDto: FilterItemsDto): Promise<ItemResponseDto[]> {
+  async findAll(
+    @Query() filterItemsDto: FilterItemsDto,
+    @Headers('accept') acceptHeader: string | undefined,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<ItemResponseDto[] | string> {
+    response.setHeader('Vary', 'Accept');
+
+    if (this.acceptsCsv(acceptHeader)) {
+      response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      response.setHeader(
+        'Content-Disposition',
+        'attachment; filename="items.csv"',
+      );
+
+      return this.itemService.findAllAsCsv(filterItemsDto);
+    }
+
+    response.setHeader('Content-Type', 'application/json; charset=utf-8');
+
     return this.itemService.findAll(filterItemsDto);
   }
 
@@ -87,5 +108,17 @@ export class ItemController {
     @Param() findItemByIdDto: FindItemByIdDto,
   ): Promise<ItemResponseDto> {
     return this.itemService.findById(findItemByIdDto);
+  }
+
+  private acceptsCsv(acceptHeader: string | undefined): boolean {
+    if (!acceptHeader) {
+      return false;
+    }
+
+    return acceptHeader
+      .toLowerCase()
+      .split(',')
+      .map((value) => value.split(';')[0].trim())
+      .includes('text/csv');
   }
 }

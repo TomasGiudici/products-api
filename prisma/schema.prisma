@@ -66,12 +66,13 @@ model item {
   item_type_id                Int?
 
   name                        String           @db.VarChar(255)
+  normalized_name             String           @db.VarChar(255)
   brand_id                    Int?
   category_id                 Int?
   quantity                    Decimal?         @db.Decimal(10, 2)
   unit_id                     Int?
   units_per_pack              Int?
-  description                 String? @db.Text
+  description                 String?          @db.Text
   dimensions                  Json?
   image_path                  String?
   metadata                    Json?

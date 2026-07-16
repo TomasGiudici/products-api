@@ -16,6 +16,7 @@ import type {
   CreateItemPersistenceData,
   UpdateItemPersistenceData,
 } from '../interface/item-persistence-data.interface';
+import { normalizeText } from '../../common/utils/normalize-text.util';
 
 export interface CreateItemData {
   identifierTypeCode: string;
@@ -25,6 +26,7 @@ export interface CreateItemData {
   itemTypeCode?: string;
 
   name: string;
+  normalizedName: string;
   description?: string;
 
   brandName?: string;
@@ -42,6 +44,7 @@ export interface UpdateItemData {
   itemTypeCode?: string;
 
   name?: string;
+  normalizedName?: string;
   description?: string;
 
   brandName?: string;
@@ -58,6 +61,8 @@ export interface UpdateItemData {
 export interface FilterItemsData {
   brandName?: string;
   categoryName?: string;
+  search?: string;
+  normalizedSearch?: string;
 }
 
 export interface CreateItemRelationIds {
@@ -90,6 +95,7 @@ export interface ItemSummaryResponseRelations {
 export class ItemMapper {
   static toCreateData(createItemDto: CreateItemDto): CreateItemData {
     const identifierValue = createItemDto.identifierValue.trim();
+    const name = createItemDto.name.trim();
 
     return {
       identifierTypeCode: createItemDto.identifierTypeCode.trim(),
@@ -98,7 +104,8 @@ export class ItemMapper {
 
       itemTypeCode: createItemDto.itemTypeCode?.trim(),
 
-      name: createItemDto.name.trim(),
+      name,
+      normalizedName: normalizeText(name),
       description: createItemDto.description?.trim(),
 
       brandName: createItemDto.brandName?.trim(),
@@ -114,10 +121,13 @@ export class ItemMapper {
   }
 
   static toUpdateData(updateItemDto: UpdateItemDto): UpdateItemData {
+    const name = updateItemDto.name?.trim();
+
     return {
       itemTypeCode: updateItemDto.itemTypeCode?.trim(),
 
-      name: updateItemDto.name?.trim(),
+      name,
+      normalizedName: name ? normalizeText(name) : undefined,
       description: updateItemDto.description?.trim(),
 
       brandName: updateItemDto.brandName?.trim(),
@@ -147,9 +157,13 @@ export class ItemMapper {
   }
 
   static toFilterData(filterItemsDto: FilterItemsDto): FilterItemsData {
+    const search = filterItemsDto.search?.trim();
+
     return {
       brandName: filterItemsDto.brandName?.trim(),
       categoryName: filterItemsDto.categoryName?.trim(),
+      search,
+      normalizedSearch: search ? normalizeText(search) : undefined,
     };
   }
 
@@ -170,6 +184,7 @@ export class ItemMapper {
       item_type_id: relationIds.itemTypeId,
 
       name: createItemData.name,
+      normalized_name: createItemData.normalizedName,
       description: createItemData.description,
 
       brand_id: relationIds.brandId,
@@ -199,6 +214,10 @@ export class ItemMapper {
 
     if (updateItemData.name !== undefined) {
       persistenceData.name = updateItemData.name;
+    }
+
+    if (updateItemData.normalizedName !== undefined) {
+      persistenceData.normalized_name = updateItemData.normalizedName;
     }
 
     if (updateItemData.description !== undefined) {

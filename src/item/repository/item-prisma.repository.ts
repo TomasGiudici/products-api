@@ -60,6 +60,12 @@ export class ItemPrismaRepository implements IItemRepository {
       where.category_id = filters.category_id;
     }
 
+    if (filters.normalized_name !== undefined) {
+      where.normalized_name = {
+        contains: filters.normalized_name,
+      };
+    }
+
     const items = await this.prisma.item.findMany({
       where,
       orderBy: {
@@ -80,6 +86,7 @@ export class ItemPrismaRepository implements IItemRepository {
         item_type_id: data.item_type_id,
 
         name: data.name,
+        normalized_name: data.normalized_name,
         description: data.description,
 
         brand_id: data.brand_id,
@@ -111,6 +118,7 @@ export class ItemPrismaRepository implements IItemRepository {
         item_type_id: data.item_type_id,
 
         name: data.name,
+        normalized_name: data.normalized_name,
         description: data.description,
 
         brand_id: data.brand_id,
