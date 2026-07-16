@@ -4,8 +4,7 @@ export class ItemCsvExporter {
   static export(items: ItemResponseDto[]): string {
     const headers = [
       'id',
-      'identifierType',
-      'identifierValue',
+      'ean',
       'itemType',
       'name',
       'description',
@@ -20,8 +19,7 @@ export class ItemCsvExporter {
 
     const rows = items.map((item) => [
       item.id,
-      item.identifierType,
-      item.identifierValue,
+      item.ean,
       item.itemType,
       item.name,
       item.description,
