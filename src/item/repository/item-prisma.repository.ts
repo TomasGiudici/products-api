@@ -29,16 +29,10 @@ export class ItemPrismaRepository implements IItemRepository {
     return this.toItemDetail(item);
   }
 
-  async findByIdentifier(
-    identifierTypeId: number,
-    normalizedIdentifierValue: string,
-  ): Promise<ItemDetail | null> {
+  async findByEan(ean: string): Promise<ItemDetail | null> {
     const item = await this.prisma.item.findUnique({
       where: {
-        identifier_type_id_normalized_identifier_value: {
-          identifier_type_id: identifierTypeId,
-          normalized_identifier_value: normalizedIdentifierValue,
-        },
+        ean,
       },
     });
 
@@ -79,9 +73,7 @@ export class ItemPrismaRepository implements IItemRepository {
   async create(data: CreateItemPersistenceData): Promise<ItemDetail> {
     const item = await this.prisma.item.create({
       data: {
-        identifier_type_id: data.identifier_type_id,
-        identifier_value: data.identifier_value,
-        normalized_identifier_value: data.normalized_identifier_value,
+        ean: data.ean,
 
         item_type_id: data.item_type_id,
 
@@ -141,9 +133,7 @@ export class ItemPrismaRepository implements IItemRepository {
   private toItemDetail(item: {
     id: string;
 
-    identifier_type_id: number;
-    identifier_value: string;
-    normalized_identifier_value: string;
+    ean: string;
 
     item_type_id: number | null;
 
@@ -165,9 +155,7 @@ export class ItemPrismaRepository implements IItemRepository {
     return {
       id: item.id,
 
-      identifierTypeId: item.identifier_type_id,
-      identifierValue: item.identifier_value,
-      normalizedIdentifierValue: item.normalized_identifier_value,
+      ean: item.ean,
 
       itemTypeId: item.item_type_id,
 

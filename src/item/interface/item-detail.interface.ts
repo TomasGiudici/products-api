@@ -2,10 +2,7 @@ import { ItemDimensionsDto } from '../dto/item-dimensions.dto';
 
 export interface ItemDetail {
   id: string;
-
-  identifierTypeId: number;
-  identifierValue: string;
-  normalizedIdentifierValue: string;
+  ean: string;
 
   itemTypeId: number | null;
 

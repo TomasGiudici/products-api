@@ -13,10 +13,7 @@ export interface FindItemsFilters {
 export interface IItemRepository {
   findById(id: string): Promise<ItemDetail | null>;
 
-  findByIdentifier(
-    identifierTypeId: number,
-    normalizedIdentifierValue: string,
-  ): Promise<ItemDetail | null>;
+  findByEan(ean: string): Promise<ItemDetail | null>;
 
   findMany(filters: FindItemsFilters): Promise<ItemDetail[]>;
 

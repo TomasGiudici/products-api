@@ -2,9 +2,7 @@ import { ItemDimensionsDto } from './item-dimensions.dto';
 
 export class ItemResponseDto {
   id!: string | null;
-
-  identifierType!: string | null;
-  identifierValue!: string | null;
+  ean!: string | null;
 
   itemType!: string | null;
 

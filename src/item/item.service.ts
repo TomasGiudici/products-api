@@ -9,7 +9,6 @@ import { BrandResponseDto } from '../brand/dto/brand-response.dto';
 import { BrandService } from '../brand/brand.service';
 import { CategoryResponseDto } from '../category/dto/category-response.dto';
 import { CategoryService } from '../category/category.service';
-import { IdentifierTypeService } from '../identifier-type/identifier-type.service';
 import { ItemTypeResponseDto } from '../item-type/dto/item-type-response.dto';
 import { ItemTypeService } from '../item-type/item-type.service';
 import { StorageService } from '../storage/storage.service';
@@ -17,22 +16,21 @@ import { UnitOfMeasureResponseDto } from '../unit-of-measure/dto/unit-of-measure
 import { UnitOfMeasureService } from '../unit-of-measure/unit-of-measure.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { FilterItemsDto } from './dto/filter-items.dto';
+import { FindItemByEanDto } from './dto/find-item-by-ean.dto';
 import { FindItemByIdDto } from './dto/find-item-by-id.dto';
-import { FindItemByIdentifierDto } from './dto/find-item-by-identifier.dto';
 import { ItemResponseDto } from './dto/item-response.dto';
 import { ItemSummaryResponseDto } from './dto/item-summary-response.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { ItemCsvExporter } from './exporter/item-csv.exporter';
 import type { ItemDetail } from './interface/item-detail.interface';
 import { ItemMapper } from './mapper/item.mapper';
 import type { IItemRepository } from './repository/item.repository.interface';
-import { ItemCsvExporter } from './exporter/item-csv.exporter';
 
 @Injectable()
 export class ItemService {
   constructor(
     @Inject('itemRepository')
     private readonly itemRepository: IItemRepository,
-    private readonly identifierTypeService: IdentifierTypeService,
     private readonly itemTypeService: ItemTypeService,
     private readonly brandService: BrandService,
     private readonly categoryService: CategoryService,
@@ -46,25 +44,10 @@ export class ItemService {
   ): Promise<ItemResponseDto> {
     const createData = ItemMapper.toCreateData(createItemDto);
 
-    const identifierType = await this.identifierTypeService.findByCode(
-      createData.identifierTypeCode,
-    );
-
-    if (!identifierType) {
-      throw new BadRequestException(
-        'El tipo de identificador indicado no existe.',
-      );
-    }
-
-    const existingItem = await this.itemRepository.findByIdentifier(
-      identifierType.id,
-      createData.normalizedIdentifierValue,
-    );
+    const existingItem = await this.itemRepository.findByEan(createData.ean);
 
     if (existingItem) {
-      throw new ConflictException(
-        'Ya existe un ítem registrado con ese identificador.',
-      );
+      throw new ConflictException('Ya existe un ítem registrado con ese EAN.');
     }
 
     const itemType = createData.itemTypeCode
@@ -101,17 +84,12 @@ export class ItemService {
 
     try {
       imagePath = image
-        ? await this.storageService.uploadItemImage(
-            identifierType.code,
-            createData.normalizedIdentifierValue,
-            image,
-          )
+        ? await this.storageService.uploadItemImage(createData.ean, image)
         : undefined;
 
       const persistenceData = ItemMapper.toCreatePersistence(
         createData,
         {
-          identifierTypeId: identifierType.id,
           itemTypeId: itemType?.id,
           brandId: brand?.id,
           categoryId: category?.id,
@@ -181,17 +159,12 @@ export class ItemService {
       throw new BadRequestException('La unidad de medida indicada no existe.');
     }
 
-    const identifierType = await this.identifierTypeService.findById(
-      existingItem.identifierTypeId,
-    );
-
     let newImagePath: string | undefined;
 
     try {
       newImagePath = image
         ? await this.storageService.uploadUpdatedItemImage(
-            identifierType.code,
-            existingItem.normalizedIdentifierValue,
+            existingItem.ean,
             image,
           )
         : undefined;
@@ -268,18 +241,18 @@ export class ItemService {
     return this.buildResponse(item);
   }
 
-  async findByIdentifier(
-    findItemByIdentifierDto: FindItemByIdentifierDto,
+  async findByEan(
+    findItemByEanDto: FindItemByEanDto,
   ): Promise<ItemResponseDto> {
-    const item = await this.findItemDetailByIdentifier(findItemByIdentifierDto);
+    const item = await this.findItemDetailByEan(findItemByEanDto);
 
     return this.buildResponse(item);
   }
 
-  async findSummaryByIdentifier(
-    findItemByIdentifierDto: FindItemByIdentifierDto,
+  async findSummaryByEan(
+    findItemByEanDto: FindItemByEanDto,
   ): Promise<ItemSummaryResponseDto> {
-    const item = await this.findItemDetailByIdentifier(findItemByIdentifierDto);
+    const item = await this.findItemDetailByEan(findItemByEanDto);
 
     const brand: BrandResponseDto | null =
       item.brandId !== null
@@ -291,23 +264,16 @@ export class ItemService {
     });
   }
 
-  private async findItemDetailByIdentifier(
-    findItemByIdentifierDto: FindItemByIdentifierDto,
+  async findAllAsCsv(filterItemsDto: FilterItemsDto): Promise<string> {
+    const items = await this.findAll(filterItemsDto);
+
+    return ItemCsvExporter.export(items);
+  }
+
+  private async findItemDetailByEan(
+    findItemByEanDto: FindItemByEanDto,
   ): Promise<ItemDetail> {
-    const identifierData = ItemMapper.toIdentifierData(findItemByIdentifierDto);
-
-    const identifierType = await this.identifierTypeService.findByCode(
-      identifierData.identifierTypeCode,
-    );
-
-    if (!identifierType) {
-      throw new NotFoundException('Tipo de identificador no encontrado.');
-    }
-
-    const item = await this.itemRepository.findByIdentifier(
-      identifierType.id,
-      identifierData.normalizedIdentifierValue,
-    );
+    const item = await this.itemRepository.findByEan(findItemByEanDto.ean);
 
     if (!item) {
       throw new NotFoundException('Ítem no encontrado.');
@@ -317,10 +283,6 @@ export class ItemService {
   }
 
   private async buildResponse(item: ItemDetail): Promise<ItemResponseDto> {
-    const identifierType = await this.identifierTypeService.findById(
-      item.identifierTypeId,
-    );
-
     const itemType: ItemTypeResponseDto | null =
       item.itemTypeId !== null
         ? await this.itemTypeService.findById(item.itemTypeId)
@@ -342,17 +304,10 @@ export class ItemService {
         : null;
 
     return ItemMapper.toResponse(item, {
-      identifierType,
       itemType,
       brand,
       category,
       unit,
     });
-  }
-
-  async findAllAsCsv(filterItemsDto: FilterItemsDto): Promise<string> {
-    const items = await this.findAll(filterItemsDto);
-
-    return ItemCsvExporter.export(items);
   }
 }

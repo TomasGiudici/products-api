@@ -51,7 +51,6 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  identifier_type: 'identifier_type',
   item_type: 'item_type',
   brand: 'brand',
   category: 'category',
@@ -73,17 +72,6 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
-
-
-export const Identifier_typeScalarFieldEnum = {
-  id: 'id',
-  code: 'code',
-  name: 'name',
-  description: 'description',
-  active: 'active'
-} as const
-
-export type Identifier_typeScalarFieldEnum = (typeof Identifier_typeScalarFieldEnum)[keyof typeof Identifier_typeScalarFieldEnum]
 
 
 export const Item_typeScalarFieldEnum = {
@@ -118,20 +106,18 @@ export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typ
 
 export const ItemScalarFieldEnum = {
   id: 'id',
-  identifier_type_id: 'identifier_type_id',
-  identifier_value: 'identifier_value',
-  normalized_identifier_value: 'normalized_identifier_value',
+  ean: 'ean',
   item_type_id: 'item_type_id',
   name: 'name',
   normalized_name: 'normalized_name',
+  description: 'description',
   brand_id: 'brand_id',
   category_id: 'category_id',
   quantity: 'quantity',
   unit_id: 'unit_id',
   units_per_pack: 'units_per_pack',
-  description: 'description',
-  dimensions: 'dimensions',
   image_path: 'image_path',
+  dimensions: 'dimensions',
   metadata: 'metadata',
   created_at: 'created_at',
   updated_at: 'updated_at'
@@ -173,14 +159,6 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -188,4 +166,12 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

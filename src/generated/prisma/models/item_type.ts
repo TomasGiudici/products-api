@@ -374,6 +374,26 @@ export type Item_typeNullableScalarRelationFilter = {
   isNot?: Prisma.item_typeWhereInput | null
 }
 
+export type StringFieldUpdateOperationsInput = {
+  set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type item_typeCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.item_typeCreateWithoutItemsInput, Prisma.item_typeUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.item_typeCreateOrConnectWithoutItemsInput

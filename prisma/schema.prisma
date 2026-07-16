@@ -9,19 +9,6 @@ datasource db {
   schemas  = ["catalog"]
 }
 
-model identifier_type {
-  id          Int     @id @default(autoincrement())
-  code        String  @unique @db.VarChar(50)
-  name        String  @db.VarChar(100)
-  description String?
-  active      Boolean @default(true)
-
-  items       item[]
-
-  @@map("identifier_types")
-  @@schema("catalog")
-}
-
 model item_type {
   id              Int     @id @default(autoincrement())
   code            String  @unique @db.VarChar(50)
@@ -57,40 +44,36 @@ model category {
 }
 
 model item {
-  id                          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ean             String   @unique @db.VarChar(13)
 
-  identifier_type_id          Int
-  identifier_value            String           @db.VarChar(100)
-  normalized_identifier_value String           @db.VarChar(100)
+  item_type_id    Int?
 
-  item_type_id                Int?
+  name            String   @db.VarChar(255)
+  normalized_name String   @db.VarChar(255)
+  description     String?  @db.Text
 
-  name                        String           @db.VarChar(255)
-  normalized_name             String           @db.VarChar(255)
-  brand_id                    Int?
-  category_id                 Int?
-  quantity                    Decimal?         @db.Decimal(10, 2)
-  unit_id                     Int?
-  units_per_pack              Int?
-  description                 String?          @db.Text
-  dimensions                  Json?
-  image_path                  String?
-  metadata                    Json?
+  brand_id        Int?
+  category_id     Int?
+  quantity        Decimal? @db.Decimal(10, 2)
+  unit_id         Int?
+  units_per_pack  Int?
+  image_path      String?
+  dimensions      Json?
+  metadata        Json?
 
-  created_at                  DateTime         @default(now()) @db.Timestamptz(6)
-  updated_at                  DateTime         @default(now()) @db.Timestamptz(6)
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @default(now()) @db.Timestamptz(6)
 
-  identifier_type             identifier_type  @relation(fields: [identifier_type_id], references: [id], onUpdate: NoAction, map: "fk_items_identifier_type")
-  item_type                   item_type?       @relation(fields: [item_type_id], references: [id], onUpdate: NoAction, map: "fk_items_item_type")
-  brand                       brand?           @relation(fields: [brand_id], references: [id], onUpdate: NoAction, map: "fk_items_brand")
-  category                    category?        @relation(fields: [category_id], references: [id], onUpdate: NoAction, map: "fk_items_category")
-  unit_of_measure             unit_of_measure? @relation(fields: [unit_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_items_unit")
+  item_type        item_type?       @relation(fields: [item_type_id], references: [id], onUpdate: NoAction, map: "fk_items_item_type")
+  brand            brand?           @relation(fields: [brand_id], references: [id], onUpdate: NoAction, map: "fk_items_brand")
+  category         category?        @relation(fields: [category_id], references: [id], onUpdate: NoAction, map: "fk_items_category")
+  unit_of_measure  unit_of_measure? @relation(fields: [unit_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_items_unit")
 
-  @@unique([identifier_type_id, normalized_identifier_value], map: "uq_items_identifier")
-  @@index([identifier_type_id], map: "idx_items_identifier_type_id")
   @@index([item_type_id], map: "idx_items_item_type_id")
   @@index([brand_id], map: "idx_items_brand_id")
   @@index([category_id], map: "idx_items_category_id")
+  @@index([normalized_name], map: "idx_items_normalized_name")
   @@map("items")
   @@schema("catalog")
 }

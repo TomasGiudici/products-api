@@ -18,8 +18,8 @@ import { memoryStorage } from 'multer';
 import { ApiKeyGuard } from '../common/guards/api-key.guard';
 import { CreateItemDto } from './dto/create-item.dto';
 import { FilterItemsDto } from './dto/filter-items.dto';
+import { FindItemByEanDto } from './dto/find-item-by-ean.dto';
 import { FindItemByIdDto } from './dto/find-item-by-id.dto';
-import { FindItemByIdentifierDto } from './dto/find-item-by-identifier.dto';
 import { ItemResponseDto } from './dto/item-response.dto';
 import { ItemSummaryResponseDto } from './dto/item-summary-response.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -87,20 +87,18 @@ export class ItemController {
     return this.itemService.findAll(filterItemsDto);
   }
 
-  @Get('identifier/:identifierTypeCode/:identifierValue/summary')
-  findSummaryByIdentifier(
-    @Param()
-    findItemByIdentifierDto: FindItemByIdentifierDto,
+  @Get('ean/:ean/summary')
+  findSummaryByEan(
+    @Param() findItemByEanDto: FindItemByEanDto,
   ): Promise<ItemSummaryResponseDto> {
-    return this.itemService.findSummaryByIdentifier(findItemByIdentifierDto);
+    return this.itemService.findSummaryByEan(findItemByEanDto);
   }
 
-  @Get('identifier/:identifierTypeCode/:identifierValue')
-  findByIdentifier(
-    @Param()
-    findItemByIdentifierDto: FindItemByIdentifierDto,
+  @Get('ean/:ean')
+  findByEan(
+    @Param() findItemByEanDto: FindItemByEanDto,
   ): Promise<ItemResponseDto> {
-    return this.itemService.findByIdentifier(findItemByIdentifierDto);
+    return this.itemService.findByEan(findItemByEanDto);
   }
 
   @Get(':id')

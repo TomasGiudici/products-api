@@ -26,16 +26,13 @@ export class StorageService {
   }
 
   async uploadItemImage(
-    identifierTypeCode: string,
-    normalizedIdentifierValue: string,
+    ean: string,
     file: Express.Multer.File,
   ): Promise<string> {
     this.validateImage(file);
 
     const extension = this.getImageExtension(file.mimetype);
-    const imagePath = `items/${this.toSafePathSegment(
-      identifierTypeCode,
-    )}-${this.toSafePathSegment(normalizedIdentifierValue)}.${extension}`;
+    const imagePath = `items/${ean}.${extension}`;
 
     const { error } = await this.supabase.storage
       .from(this.productImagesBucket)
@@ -54,8 +51,7 @@ export class StorageService {
   }
 
   async uploadUpdatedItemImage(
-    identifierTypeCode: string,
-    normalizedIdentifierValue: string,
+    ean: string,
     file: Express.Multer.File,
   ): Promise<string> {
     this.validateImage(file);
@@ -63,11 +59,7 @@ export class StorageService {
     const extension = this.getImageExtension(file.mimetype);
     const timestamp = Date.now();
 
-    const imagePath = `items/${this.toSafePathSegment(
-      identifierTypeCode,
-    )}-${this.toSafePathSegment(
-      normalizedIdentifierValue,
-    )}-${timestamp}.${extension}`;
+    const imagePath = `items/${ean}-${timestamp}.${extension}`;
 
     const { error } = await this.supabase.storage
       .from(this.productImagesBucket)
@@ -123,14 +115,5 @@ export class StorageService {
     }
 
     throw new BadRequestException('Formato de imagen no soportado.');
-  }
-
-  private toSafePathSegment(value: string): string {
-    return value
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
   }
 }

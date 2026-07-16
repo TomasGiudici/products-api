@@ -1,12 +1,10 @@
 import { BrandResponseDto } from '../../brand/dto/brand-response.dto';
 import { CategoryResponseDto } from '../../category/dto/category-response.dto';
-import { normalizeIdentifierValue } from '../../common/utils/normalize-identifier-value.util';
-import { IdentifierTypeResponseDto } from '../../identifier-type/dto/identifier-type-response.dto';
+import { normalizeText } from '../../common/utils/normalize-text.util';
 import { ItemTypeResponseDto } from '../../item-type/dto/item-type-response.dto';
 import { UnitOfMeasureResponseDto } from '../../unit-of-measure/dto/unit-of-measure-response.dto';
 import { CreateItemDto } from '../dto/create-item.dto';
 import { FilterItemsDto } from '../dto/filter-items.dto';
-import { FindItemByIdentifierDto } from '../dto/find-item-by-identifier.dto';
 import type { ItemDimensionsDto } from '../dto/item-dimensions.dto';
 import { ItemResponseDto } from '../dto/item-response.dto';
 import { ItemSummaryResponseDto } from '../dto/item-summary-response.dto';
@@ -16,12 +14,9 @@ import type {
   CreateItemPersistenceData,
   UpdateItemPersistenceData,
 } from '../interface/item-persistence-data.interface';
-import { normalizeText } from '../../common/utils/normalize-text.util';
 
 export interface CreateItemData {
-  identifierTypeCode: string;
-  identifierValue: string;
-  normalizedIdentifierValue: string;
+  ean: string;
 
   itemTypeCode?: string;
 
@@ -66,7 +61,6 @@ export interface FilterItemsData {
 }
 
 export interface CreateItemRelationIds {
-  identifierTypeId: number;
   itemTypeId?: number;
   brandId?: number;
   categoryId?: number;
@@ -81,7 +75,6 @@ export interface UpdateItemRelationIds {
 }
 
 export interface ItemResponseRelations {
-  identifierType: IdentifierTypeResponseDto | null;
   itemType: ItemTypeResponseDto | null;
   brand: BrandResponseDto | null;
   category: CategoryResponseDto | null;
@@ -94,13 +87,10 @@ export interface ItemSummaryResponseRelations {
 
 export class ItemMapper {
   static toCreateData(createItemDto: CreateItemDto): CreateItemData {
-    const identifierValue = createItemDto.identifierValue.trim();
     const name = createItemDto.name.trim();
 
     return {
-      identifierTypeCode: createItemDto.identifierTypeCode.trim(),
-      identifierValue,
-      normalizedIdentifierValue: normalizeIdentifierValue(identifierValue),
+      ean: createItemDto.ean.trim(),
 
       itemTypeCode: createItemDto.itemTypeCode?.trim(),
 
@@ -142,20 +132,6 @@ export class ItemMapper {
     };
   }
 
-  static toIdentifierData(findItemByIdentifierDto: FindItemByIdentifierDto): {
-    identifierTypeCode: string;
-    identifierValue: string;
-    normalizedIdentifierValue: string;
-  } {
-    const identifierValue = findItemByIdentifierDto.identifierValue.trim();
-
-    return {
-      identifierTypeCode: findItemByIdentifierDto.identifierTypeCode.trim(),
-      identifierValue,
-      normalizedIdentifierValue: normalizeIdentifierValue(identifierValue),
-    };
-  }
-
   static toFilterData(filterItemsDto: FilterItemsDto): FilterItemsData {
     const search = filterItemsDto.search?.trim();
 
@@ -177,9 +153,7 @@ export class ItemMapper {
     imagePath?: string,
   ): CreateItemPersistenceData {
     return {
-      identifier_type_id: relationIds.identifierTypeId,
-      identifier_value: createItemData.identifierValue,
-      normalized_identifier_value: createItemData.normalizedIdentifierValue,
+      ean: createItemData.ean,
 
       item_type_id: relationIds.itemTypeId,
 
@@ -265,9 +239,7 @@ export class ItemMapper {
   ): ItemResponseDto {
     return {
       id: item.id ?? null,
-
-      identifierType: relations.identifierType?.name ?? null,
-      identifierValue: item.identifierValue ?? null,
+      ean: item.ean ?? null,
 
       itemType: relations.itemType?.name ?? null,
 

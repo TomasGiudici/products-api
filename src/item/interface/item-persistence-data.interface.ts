@@ -1,9 +1,7 @@
 import { ItemDimensionsDto } from '../dto/item-dimensions.dto';
 
 export interface CreateItemPersistenceData {
-  identifier_type_id: number;
-  identifier_value: string;
-  normalized_identifier_value: string;
+  ean: string;
 
   item_type_id?: number;
 

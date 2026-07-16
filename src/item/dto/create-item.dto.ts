@@ -15,22 +15,10 @@ import { ItemDimensionsDto } from './item-dimensions.dto';
 
 export class CreateItemDto {
   @IsString()
-  @IsNotEmpty({
-    message: 'identifierTypeCode no puede estar vacío.',
+  @Matches(/^\d{13}$/, {
+    message: 'ean debe contener exactamente 13 dígitos.',
   })
-  @MaxLength(50, {
-    message: 'identifierTypeCode no puede superar los 50 caracteres.',
-  })
-  identifierTypeCode!: string;
-
-  @IsString()
-  @IsNotEmpty({
-    message: 'identifierValue no puede estar vacío.',
-  })
-  @MaxLength(100, {
-    message: 'identifierValue no puede superar los 100 caracteres.',
-  })
-  identifierValue!: string;
+  ean!: string;
 
   @IsOptional()
   @IsString()

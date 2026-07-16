@@ -18,11 +18,6 @@ export { Prisma }
 export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
- * Model identifier_type
- * 
- */
-export type identifier_type = Prisma.identifier_typeModel
-/**
  * Model item_type
  * 
  */
