@@ -68,8 +68,8 @@ GET /items
 GET /items?brandName=:brandName
 GET /items?categoryName=:categoryName
 GET /items/:id
-GET /items/identifier/:identifierTypeCode/:identifierValue
-GET /items/identifier/:identifierTypeCode/:identifierValue/summary
+GET /items/ean/:eanValue
+GET /items/ean/:eanValue/summary
 GET /brand
 GET /brand/:id
 GET /category
@@ -105,14 +105,14 @@ Respuesta:
 
 ## Ítems / productos
 
-### GET `/items/identifier/:identifierTypeCode/:identifierValue`
+### GET `/items/ean/:ean`
 
 Consulta un ítem por tipo de identificador y valor de identificador.
 
 Ejemplo:
 
 ```http
-GET http://localhost:3000/catalog/items/identifier/EAN13/7790000000001
+GET http://localhost:3000/catalog/items/ean/7790000000001
 ```
 
 Respuesta:
@@ -120,8 +120,7 @@ Respuesta:
 ```json
 {
   "id": "7d2b17fd-0f57-4f26-b57b-5a9bb81afeee",
-  "identifierType": "EAN-13",
-  "identifierValue": "7790000000001",
+  "ean": "7790000000001",
   "itemType": "Producto de supermercado",
   "name": "Producto de prueba 500 ml",
   "description": "Gaseosa sabor cola en botella de 500 ml.",
@@ -181,8 +180,7 @@ Respuesta:
 [
   {
     "id": "7d2b17fd-0f57-4f26-b57b-5a9bb81afeee",
-    "identifierType": "EAN-13",
-    "identifierValue": "7790000000001",
+    "ean": "7790000000001",
     "itemType": "Producto de supermercado",
     "name": "Producto de prueba 500 ml",
     "description": "Gaseosa sabor cola en botella de 500 ml.",
@@ -205,14 +203,14 @@ Respuesta:
 ]
 ```
 
-### GET `/items/identifier/:identifierTypeCode/:identifierValue/summary`
+### GET `/items/ean/:ean/summary`
 
 Consulta un ítem por identificador y devuelve una respuesta resumida.
 
 Ejemplo:
 
 ```http
-GET http://localhost:3000/catalog/items/identifier/EAN13/7790000000001/summary
+GET http://localhost:3000/catalog/items/ean/7790000000001/summary
 ```
 
 Respuesta:
@@ -227,7 +225,7 @@ Respuesta:
 
 ### POST `/items`
 
-Crea un ítem. Para registrar un producto de supermercado, se usa normalmente `identifierTypeCode: "EAN13"` e `itemTypeCode: "SUPERMARKET_PRODUCT"`.
+Crea un ítem. Para registrar un producto de supermercado, se usa normalmente `itemTypeCode: "SUPERMARKET_PRODUCT"`.
 
 Requiere API Key.
 
@@ -237,8 +235,7 @@ Campos:
 
 | Campo | Tipo | Requerido | Descripción |
 |---|---|---|---|
-| `identifierTypeCode` | string | Sí | Código del tipo de identificador. Debe existir previamente. Ejemplo: `EAN13`. |
-| `identifierValue` | string | Sí | Valor del identificador. Para `EAN13`, sería el código de barras del producto. |
+| `ean` | string | Sí | Valor del identificador. Para `EAN13`, sería el código de barras del producto. |
 | `name` | string | Sí | Nombre del ítem/producto. |
 | `itemTypeCode` | string | No | Código del tipo de ítem. Si se informa, debe existir previamente. Ejemplo: `SUPERMARKET_PRODUCT`. |
 | `description` | string | No | Descripción del ítem/producto. |
@@ -255,8 +252,7 @@ Ejemplo JSON sin imagen:
 
 ```json
 {
-  "identifierTypeCode": "EAN13",
-  "identifierValue": "7790000000001",
+  "ean": "7790000000001",
   "itemTypeCode": "SUPERMARKET_PRODUCT",
   "name": "Producto de prueba 500 ml",
   "description": "Gaseosa sabor cola en botella de 500 ml.",
@@ -276,26 +272,6 @@ Ejemplo JSON sin imagen:
     "flavor": "cola"
   }
 }
-```
-
-Ejemplo con `curl` en Windows CMD, enviando imagen:
-
-```cmd
-curl.exe -X POST "http://localhost:3000/catalog/items" ^
-  -H "x-api-key: YOUR_PRIVATE_API_KEY" ^
-  -F "identifierTypeCode=EAN13" ^
-  -F "identifierValue=7790000000001" ^
-  -F "itemTypeCode=SUPERMARKET_PRODUCT" ^
-  -F "name=Producto de prueba 500 ml" ^
-  -F "description=Gaseosa sabor cola en botella de 500 ml." ^
-  -F "brandName=Coca Cola" ^
-  -F "categoryName=Bebidas" ^
-  -F "quantity=500" ^
-  -F "unitAbbreviation=ml" ^
-  -F "unitsPerPack=1" ^
-  -F "dimensions={\"width\":6.5,\"height\":20,\"depth\":6.5,\"unit\":\"cm\"}" ^
-  -F "metadata={\"container\":\"bottle\",\"flavor\":\"cola\"}" ^
-  -F "image=@C:\ruta\a\imagen.jpg;type=image/jpeg"
 ```
 
 Notas importantes:
@@ -318,8 +294,7 @@ Respuesta esperada:
 ```json
 {
   "id": "7d2b17fd-0f57-4f26-b57b-5a9bb81afeee",
-  "identifierType": "EAN-13",
-  "identifierValue": "7790000000001",
+  "ean": "7790000000001",
   "itemType": "Producto de supermercado",
   "name": "Producto de prueba 500 ml",
   "description": "Gaseosa sabor cola en botella de 500 ml.",
