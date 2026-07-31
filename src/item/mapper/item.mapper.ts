@@ -10,6 +10,7 @@ import { ItemResponseDto } from '../dto/item-response.dto';
 import { ItemSummaryResponseDto } from '../dto/item-summary-response.dto';
 import { UpdateItemDto } from '../dto/update-item.dto';
 import type { ItemDetail } from '../interface/item-detail.interface';
+import type { ImportItemData } from '../interface/import-item-data.interface';
 import type {
   CreateItemPersistenceData,
   UpdateItemPersistenceData,
@@ -58,6 +59,7 @@ export interface FilterItemsData {
   categoryName?: string;
   search?: string;
   normalizedSearch?: string;
+  page: number;
 }
 
 export interface CreateItemRelationIds {
@@ -83,6 +85,10 @@ export interface ItemResponseRelations {
 
 export interface ItemSummaryResponseRelations {
   brand: BrandResponseDto | null;
+}
+
+export interface ItemResponseComputedData {
+  imageUrl: string | null;
 }
 
 export class ItemMapper {
@@ -140,6 +146,7 @@ export class ItemMapper {
       categoryName: filterItemsDto.categoryName?.trim(),
       search,
       normalizedSearch: search ? normalizeText(search) : undefined,
+      page: filterItemsDto.page ?? 1,
     };
   }
 
@@ -236,6 +243,7 @@ export class ItemMapper {
   static toResponse(
     item: ItemDetail,
     relations: ItemResponseRelations,
+    computedData: ItemResponseComputedData,
   ): ItemResponseDto {
     return {
       id: item.id ?? null,
@@ -252,7 +260,7 @@ export class ItemMapper {
       quantity: item.quantity ?? null,
       unitAbbreviation: relations.unit?.abbreviation ?? null,
 
-      imagePath: item.imagePath ?? null,
+      imageUrl: computedData.imageUrl,
 
       dimensions: item.dimensions ?? null,
       metadata: item.metadata ?? null,
@@ -267,6 +275,56 @@ export class ItemMapper {
       id: item.id ?? null,
       name: item.name ?? null,
       brand: relations.brand?.name ?? null,
+    };
+  }
+
+  static toCreateDataFromImport(
+    importItemData: ImportItemData,
+  ): CreateItemData {
+    const name = importItemData.name.trim();
+
+    return {
+      ean: importItemData.ean.trim(),
+
+      itemTypeCode: importItemData.itemTypeCode?.trim(),
+
+      name,
+      normalizedName: normalizeText(name),
+      description: importItemData.description?.trim(),
+
+      brandName: importItemData.brandName?.trim(),
+      categoryName: importItemData.categoryName?.trim(),
+
+      quantity: importItemData.quantity,
+      unitAbbreviation: importItemData.unitAbbreviation?.trim(),
+      unitsPerPack: importItemData.unitsPerPack,
+
+      dimensions: importItemData.dimensions,
+      metadata: importItemData.metadata,
+    };
+  }
+
+  static toUpdateDataFromImport(
+    importItemData: ImportItemData,
+  ): UpdateItemData {
+    const name = importItemData.name.trim();
+
+    return {
+      itemTypeCode: importItemData.itemTypeCode?.trim(),
+
+      name,
+      normalizedName: normalizeText(name),
+      description: importItemData.description?.trim(),
+
+      brandName: importItemData.brandName?.trim(),
+      categoryName: importItemData.categoryName?.trim(),
+
+      quantity: importItemData.quantity,
+      unitAbbreviation: importItemData.unitAbbreviation?.trim(),
+      unitsPerPack: importItemData.unitsPerPack,
+
+      dimensions: importItemData.dimensions,
+      metadata: importItemData.metadata,
     };
   }
 }

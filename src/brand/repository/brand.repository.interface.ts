@@ -12,5 +12,7 @@ export interface IBrandRepository {
 
   findById(id: number): Promise<Brand | null>;
 
+  findByName(name: string): Promise<Brand | null>;
+
   findByNormalizedName(normalizedName: string): Promise<Brand | null>;
 }

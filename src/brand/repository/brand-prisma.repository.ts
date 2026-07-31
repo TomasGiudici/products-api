@@ -32,6 +32,14 @@ export class BrandPrismaRepository implements IBrandRepository {
     });
   }
 
+  async findByName(name: string): Promise<Brand | null> {
+    return this.prisma.brand.findUnique({
+      where: {
+        name,
+      },
+    });
+  }
+
   async findByNormalizedName(normalizedName: string): Promise<Brand | null> {
     return this.prisma.brand.findUnique({
       where: {

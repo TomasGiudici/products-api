@@ -8,6 +8,8 @@ import type {
 } from '../interface/item-persistence-data.interface';
 import type {
   FindItemsFilters,
+  FindItemsPagination,
+  FindItemsResult,
   IItemRepository,
 } from './item.repository.interface';
 
@@ -43,7 +45,61 @@ export class ItemPrismaRepository implements IItemRepository {
     return this.toItemDetail(item);
   }
 
-  async findMany(filters: FindItemsFilters): Promise<ItemDetail[]> {
+  async findMany(
+    filters: FindItemsFilters,
+    pagination: FindItemsPagination,
+  ): Promise<FindItemsResult> {
+    const where = this.buildWhere(filters);
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.item.findMany({
+        where,
+        skip: pagination.skip,
+        take: pagination.take,
+        orderBy: [
+          {
+            name: 'asc',
+          },
+          {
+            id: 'asc',
+          },
+        ],
+      }),
+      this.prisma.item.count({
+        where,
+      }),
+    ]);
+
+    return {
+      items: items.map((item) => this.toItemDetail(item)),
+      total,
+    };
+  }
+
+  async findExportBatch(
+    filters: FindItemsFilters,
+    pagination: FindItemsPagination,
+  ): Promise<ItemDetail[]> {
+    const where = this.buildWhere(filters);
+
+    const items = await this.prisma.item.findMany({
+      where,
+      skip: pagination.skip,
+      take: pagination.take,
+      orderBy: [
+        {
+          name: 'asc',
+        },
+        {
+          id: 'asc',
+        },
+      ],
+    });
+
+    return items.map((item) => this.toItemDetail(item));
+  }
+
+  private buildWhere(filters: FindItemsFilters): Prisma.itemWhereInput {
     const where: Prisma.itemWhereInput = {};
 
     if (filters.brand_id !== undefined) {
@@ -60,14 +116,7 @@ export class ItemPrismaRepository implements IItemRepository {
       };
     }
 
-    const items = await this.prisma.item.findMany({
-      where,
-      orderBy: {
-        name: 'asc',
-      },
-    });
-
-    return items.map((item) => this.toItemDetail(item));
+    return where;
   }
 
   async create(data: CreateItemPersistenceData): Promise<ItemDetail> {
@@ -198,5 +247,21 @@ export class ItemPrismaRepository implements IItemRepository {
     }
 
     return null;
+  }
+
+  async findByEans(eans: string[]): Promise<ItemDetail[]> {
+    if (eans.length === 0) {
+      return [];
+    }
+
+    const items = await this.prisma.item.findMany({
+      where: {
+        ean: {
+          in: eans,
+        },
+      },
+    });
+
+    return items.map((item) => this.toItemDetail(item));
   }
 }

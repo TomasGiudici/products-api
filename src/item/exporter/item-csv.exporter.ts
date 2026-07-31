@@ -1,8 +1,8 @@
 import { ItemResponseDto } from '../dto/item-response.dto';
 
 export class ItemCsvExporter {
-  static export(items: ItemResponseDto[]): string {
-    const headers = [
+  static headers(): string {
+    return [
       'id',
       'ean',
       'itemType',
@@ -12,12 +12,18 @@ export class ItemCsvExporter {
       'category',
       'quantity',
       'unitAbbreviation',
-      'imagePath',
+      'imageUrl',
       'dimensions',
       'metadata',
-    ];
+    ].join(',');
+  }
 
-    const rows = items.map((item) => [
+  static rows(items: ItemResponseDto[]): string {
+    return items.map((item) => this.row(item)).join('\r\n');
+  }
+
+  static row(item: ItemResponseDto): string {
+    const values = [
       item.id,
       item.ean,
       item.itemType,
@@ -27,17 +33,12 @@ export class ItemCsvExporter {
       item.category,
       item.quantity,
       item.unitAbbreviation,
-      item.imagePath,
+      item.imageUrl,
       item.dimensions,
       item.metadata,
-    ]);
+    ];
 
-    return [
-      headers.join(','),
-      ...rows.map((row) =>
-        row.map((value) => this.escapeCsvValue(value)).join(','),
-      ),
-    ].join('\r\n');
+    return values.map((value) => this.escapeCsvValue(value)).join(',');
   }
 
   private static escapeCsvValue(value: unknown): string {

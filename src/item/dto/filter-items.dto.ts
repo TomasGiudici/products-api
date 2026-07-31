@@ -1,4 +1,12 @@
-import { IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class FilterItemsDto {
   @IsOptional()
@@ -30,4 +38,10 @@ export class FilterItemsDto {
     message: 'search no puede superar los 255 caracteres.',
   })
   search?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'page debe ser un número entero.' })
+  @Min(1, { message: 'page debe ser mayor o igual a 1.' })
+  page?: number;
 }

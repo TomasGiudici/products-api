@@ -21,7 +21,8 @@ export class BrandService {
   async createBrand(createBrandDto: CreateBrandDto): Promise<BrandResponseDto> {
     const persistenceData = BrandMapper.toPersistence(createBrandDto);
 
-    const existingBrand = await this.brandRepository.findByNormalizedName(
+    const existingBrand = await this.findExistingBrand(
+      persistenceData.name,
       persistenceData.normalized_name,
     );
 
@@ -54,31 +55,60 @@ export class BrandService {
     const trimmedName = name.trim();
     const normalizedName = normalizeText(trimmedName);
 
-    const existingBrand =
-      await this.brandRepository.findByNormalizedName(normalizedName);
+    const existingBrand = await this.findExistingBrand(
+      trimmedName,
+      normalizedName,
+    );
 
     if (existingBrand) {
       return BrandMapper.toReference(existingBrand);
     }
 
-    const createdBrand = await this.brandRepository.create({
-      name: trimmedName,
-      normalized_name: normalizedName,
-    });
+    try {
+      const createdBrand = await this.brandRepository.create({
+        name: trimmedName,
+        normalized_name: normalizedName,
+      });
 
-    return BrandMapper.toReference(createdBrand);
+      return BrandMapper.toReference(createdBrand);
+    } catch (error: unknown) {
+      const brandAfterCreateFailure = await this.findExistingBrand(
+        trimmedName,
+        normalizedName,
+      );
+
+      if (brandAfterCreateFailure) {
+        return BrandMapper.toReference(brandAfterCreateFailure);
+      }
+
+      throw error;
+    }
   }
 
   async findByName(name: string): Promise<BrandResponseDto | null> {
-    const normalizedName = normalizeText(name);
+    const trimmedName = name.trim();
+    const normalizedName = normalizeText(trimmedName);
 
-    const brand =
-      await this.brandRepository.findByNormalizedName(normalizedName);
+    const brand = await this.findExistingBrand(trimmedName, normalizedName);
 
     if (!brand) {
       return null;
     }
 
     return BrandMapper.toResponse(brand);
+  }
+
+  private async findExistingBrand(
+    name: string,
+    normalizedName: string,
+  ): Promise<Awaited<ReturnType<IBrandRepository['findByNormalizedName']>>> {
+    const brandByNormalizedName =
+      await this.brandRepository.findByNormalizedName(normalizedName);
+
+    if (brandByNormalizedName) {
+      return brandByNormalizedName;
+    }
+
+    return this.brandRepository.findByName(name);
   }
 }

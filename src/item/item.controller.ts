@@ -6,8 +6,8 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Res,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -24,6 +24,9 @@ import { ItemResponseDto } from './dto/item-response.dto';
 import { ItemSummaryResponseDto } from './dto/item-summary-response.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemService } from './item.service';
+import { PaginatedItemsResponseDto } from './dto/paginated-items-response.dto';
+import { ImportItemsQueryDto } from './dto/import-items-query.dto';
+import { ImportItemsResponseDto } from './dto/import-items-response.dto';
 
 @Controller('items')
 export class ItemController {
@@ -64,26 +67,29 @@ export class ItemController {
     return this.itemService.updateItem(findItemByIdDto, updateItemDto, image);
   }
 
-  @Get()
-  async findAll(
+  @Get('export')
+  @UseGuards(ApiKeyGuard)
+  async exportCsv(
     @Query() filterItemsDto: FilterItemsDto,
-    @Headers('accept') acceptHeader: string | undefined,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<ItemResponseDto[] | string> {
-    response.setHeader('Vary', 'Accept');
+    @Res() response: Response,
+  ): Promise<void> {
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="items.csv"',
+    );
 
-    if (this.acceptsCsv(acceptHeader)) {
-      response.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      response.setHeader(
-        'Content-Disposition',
-        'attachment; filename="items.csv"',
-      );
-
-      return this.itemService.findAllAsCsv(filterItemsDto);
+    for await (const chunk of this.itemService.exportAsCsv(filterItemsDto)) {
+      await this.writeChunk(response, chunk);
     }
 
-    response.setHeader('Content-Type', 'application/json; charset=utf-8');
+    response.end();
+  }
 
+  @Get()
+  findAll(
+    @Query() filterItemsDto: FilterItemsDto,
+  ): Promise<PaginatedItemsResponseDto> {
     return this.itemService.findAll(filterItemsDto);
   }
 
@@ -108,15 +114,30 @@ export class ItemController {
     return this.itemService.findById(findItemByIdDto);
   }
 
-  private acceptsCsv(acceptHeader: string | undefined): boolean {
-    if (!acceptHeader) {
-      return false;
+  private async writeChunk(response: Response, chunk: string): Promise<void> {
+    if (response.write(chunk)) {
+      return;
     }
 
-    return acceptHeader
-      .toLowerCase()
-      .split(',')
-      .map((value) => value.split(';')[0].trim())
-      .includes('text/csv');
+    await new Promise<void>((resolve) => {
+      response.once('drain', resolve);
+    });
+  }
+
+  @Post('import')
+  @UseGuards(ApiKeyGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 10 * 1024 * 1024,
+      },
+    }),
+  )
+  importItems(
+    @Query() importItemsQueryDto: ImportItemsQueryDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<ImportItemsResponseDto> {
+    return this.itemService.importItems(importItemsQueryDto, file);
   }
 }

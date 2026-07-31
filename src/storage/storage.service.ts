@@ -116,4 +116,16 @@ export class StorageService {
 
     throw new BadRequestException('Formato de imagen no soportado.');
   }
+
+  getPublicItemImageUrl(imagePath: string | null | undefined): string | null {
+    if (!imagePath) {
+      return null;
+    }
+
+    const { data } = this.supabase.storage
+      .from(this.productImagesBucket)
+      .getPublicUrl(imagePath);
+
+    return data.publicUrl;
+  }
 }

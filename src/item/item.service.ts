@@ -16,18 +16,50 @@ import { UnitOfMeasureResponseDto } from '../unit-of-measure/dto/unit-of-measure
 import { UnitOfMeasureService } from '../unit-of-measure/unit-of-measure.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { FilterItemsDto } from './dto/filter-items.dto';
+import { PaginatedItemsResponseDto } from './dto/paginated-items-response.dto';
 import { FindItemByEanDto } from './dto/find-item-by-ean.dto';
 import { FindItemByIdDto } from './dto/find-item-by-id.dto';
 import { ItemResponseDto } from './dto/item-response.dto';
 import { ItemSummaryResponseDto } from './dto/item-summary-response.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { ItemCsvExporter } from './exporter/item-csv.exporter';
 import type { ItemDetail } from './interface/item-detail.interface';
 import { ItemMapper } from './mapper/item.mapper';
 import type { IItemRepository } from './repository/item.repository.interface';
+import { ItemCsvExporter } from './exporter/item-csv.exporter';
+import type { FindItemsFilters } from './repository/item.repository.interface';
+import {
+  ImportItemsMode,
+  ImportItemsQueryDto,
+} from './dto/import-items-query.dto';
+import {
+  ImportItemsErrorDto,
+  ImportItemsResponseDto,
+} from './dto/import-items-response.dto';
+import { ItemImportFileParser } from './importer/item-import-file.parser';
+import type {
+  ImportItemData,
+  RawImportItemRow,
+} from './interface/import-item-data.interface';
+
+interface ImportRelationIds {
+  itemTypeId?: number;
+  brandId?: number;
+  categoryId?: number;
+  unitId?: number;
+}
+
+interface ImportRelationCache {
+  itemTypes: Map<string, ItemTypeResponseDto | null>;
+  brands: Map<string, BrandResponseDto | null>;
+  categories: Map<string, CategoryResponseDto | null>;
+  units: Map<string, UnitOfMeasureResponseDto | null>;
+}
 
 @Injectable()
 export class ItemService {
+  private static readonly ITEMS_PAGE_SIZE = 50;
+  private static readonly CSV_BATCH_SIZE = 500;
+  private static readonly IMPORT_BATCH_SIZE = 500;
   constructor(
     @Inject('itemRepository')
     private readonly itemRepository: IItemRepository,
@@ -199,36 +231,41 @@ export class ItemService {
     }
   }
 
-  async findAll(filterItemsDto: FilterItemsDto): Promise<ItemResponseDto[]> {
+  async findAll(
+    filterItemsDto: FilterItemsDto,
+  ): Promise<PaginatedItemsResponseDto> {
     const filterData = ItemMapper.toFilterData(filterItemsDto);
+    const repositoryFilters = await this.buildRepositoryFilters(filterItemsDto);
 
-    if (filterData.search && !filterData.normalizedSearch) {
-      return [];
+    if (!repositoryFilters) {
+      return this.emptyPaginatedResponse(filterData.page);
     }
 
-    const brand = filterData.brandName
-      ? await this.brandService.findByName(filterData.brandName)
-      : null;
+    const limit = ItemService.ITEMS_PAGE_SIZE;
+    const skip = (filterData.page - 1) * limit;
 
-    if (filterData.brandName && !brand) {
-      return [];
-    }
-
-    const category = filterData.categoryName
-      ? await this.categoryService.findByName(filterData.categoryName)
-      : null;
-
-    if (filterData.categoryName && !category) {
-      return [];
-    }
-
-    const items = await this.itemRepository.findMany({
-      brand_id: brand?.id,
-      category_id: category?.id,
-      normalized_name: filterData.normalizedSearch,
+    const result = await this.itemRepository.findMany(repositoryFilters, {
+      skip,
+      take: limit,
     });
 
-    return Promise.all(items.map((item) => this.buildResponse(item)));
+    const data = await Promise.all(
+      result.items.map((item) => this.buildResponse(item)),
+    );
+
+    const totalPages = Math.ceil(result.total / limit);
+
+    return {
+      data,
+      meta: {
+        page: filterData.page,
+        limit,
+        total: result.total,
+        totalPages,
+        hasNextPage: filterData.page < totalPages,
+        hasPreviousPage: filterData.page > 1,
+      },
+    };
   }
 
   async findById(findItemByIdDto: FindItemByIdDto): Promise<ItemResponseDto> {
@@ -264,12 +301,6 @@ export class ItemService {
     });
   }
 
-  async findAllAsCsv(filterItemsDto: FilterItemsDto): Promise<string> {
-    const items = await this.findAll(filterItemsDto);
-
-    return ItemCsvExporter.export(items);
-  }
-
   private async findItemDetailByEan(
     findItemByEanDto: FindItemByEanDto,
   ): Promise<ItemDetail> {
@@ -303,11 +334,598 @@ export class ItemService {
         ? await this.unitOfMeasureService.findById(item.unitId)
         : null;
 
-    return ItemMapper.toResponse(item, {
-      itemType,
-      brand,
-      category,
+    const imageUrl = this.storageService.getPublicItemImageUrl(item.imagePath);
+
+    return ItemMapper.toResponse(
+      item,
+      {
+        itemType,
+        brand,
+        category,
+        unit,
+      },
+      {
+        imageUrl,
+      },
+    );
+  }
+
+  private emptyPaginatedResponse(page: number): PaginatedItemsResponseDto {
+    return {
+      data: [],
+      meta: {
+        page,
+        limit: ItemService.ITEMS_PAGE_SIZE,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async *exportAsCsv(filterItemsDto: FilterItemsDto): AsyncGenerator<string> {
+    const repositoryFilters = await this.buildRepositoryFilters(filterItemsDto);
+
+    yield `${ItemCsvExporter.headers()}\r\n`;
+
+    if (!repositoryFilters) {
+      return;
+    }
+
+    let page = 1;
+
+    while (true) {
+      const skip = (page - 1) * ItemService.CSV_BATCH_SIZE;
+
+      const items = await this.itemRepository.findExportBatch(
+        repositoryFilters,
+        {
+          skip,
+          take: ItemService.CSV_BATCH_SIZE,
+        },
+      );
+
+      if (items.length === 0) {
+        break;
+      }
+
+      const responseItems = await Promise.all(
+        items.map((item) => this.buildResponse(item)),
+      );
+
+      yield `${ItemCsvExporter.rows(responseItems)}\r\n`;
+
+      if (items.length < ItemService.CSV_BATCH_SIZE) {
+        break;
+      }
+
+      page++;
+    }
+  }
+
+  private async buildRepositoryFilters(
+    filterItemsDto: FilterItemsDto,
+  ): Promise<FindItemsFilters | null> {
+    const filterData = ItemMapper.toFilterData(filterItemsDto);
+
+    if (filterData.search && !filterData.normalizedSearch) {
+      return null;
+    }
+
+    const brand = filterData.brandName
+      ? await this.brandService.findByName(filterData.brandName)
+      : null;
+
+    if (filterData.brandName && !brand) {
+      return null;
+    }
+
+    const category = filterData.categoryName
+      ? await this.categoryService.findByName(filterData.categoryName)
+      : null;
+
+    if (filterData.categoryName && !category) {
+      return null;
+    }
+
+    return {
+      brand_id: brand?.id,
+      category_id: category?.id,
+      normalized_name: filterData.normalizedSearch,
+    };
+  }
+
+  async importItems(
+    importItemsQueryDto: ImportItemsQueryDto,
+    file?: Express.Multer.File,
+  ): Promise<ImportItemsResponseDto> {
+    if (!file) {
+      throw new BadRequestException('Debe enviar un archivo en el campo file.');
+    }
+
+    const mode = importItemsQueryDto.mode ?? ImportItemsMode.UPSERT;
+    const rawRows = ItemImportFileParser.parse(file);
+
+    const result: ImportItemsResponseDto = {
+      mode,
+      totalRows: rawRows.length,
+      processed: 0,
+      created: 0,
+      updated: 0,
+      failed: 0,
+      errors: [],
+    };
+
+    const rowsToImport: ImportItemData[] = [];
+    const seenEans = new Set<string>();
+
+    for (const rawRow of rawRows) {
+      const parsedRow = this.parseImportRow(rawRow);
+
+      if (parsedRow.error) {
+        this.addImportError(result, parsedRow.error);
+        continue;
+      }
+
+      const itemData = parsedRow.data;
+
+      if (!itemData) {
+        continue;
+      }
+
+      if (seenEans.has(itemData.ean)) {
+        this.addImportError(result, {
+          row: itemData.row,
+          ean: itemData.ean,
+          message: 'EAN duplicado dentro del archivo.',
+        });
+
+        continue;
+      }
+
+      seenEans.add(itemData.ean);
+      rowsToImport.push(itemData);
+    }
+
+    const relationCache = this.createImportRelationCache();
+
+    for (
+      let index = 0;
+      index < rowsToImport.length;
+      index += ItemService.IMPORT_BATCH_SIZE
+    ) {
+      const batch = rowsToImport.slice(
+        index,
+        index + ItemService.IMPORT_BATCH_SIZE,
+      );
+
+      await this.processImportBatch(batch, mode, result, relationCache);
+    }
+
+    result.processed = result.created + result.updated;
+    result.failed = result.errors.length;
+
+    return result;
+  }
+
+  private async processImportBatch(
+    rows: ImportItemData[],
+    mode: ImportItemsMode,
+    result: ImportItemsResponseDto,
+    relationCache: ImportRelationCache,
+  ): Promise<void> {
+    const eans = rows.map((row) => row.ean);
+
+    const existingItems = await this.itemRepository.findByEans(eans);
+
+    const existingItemsByEan = new Map(
+      existingItems.map((item) => [item.ean, item]),
+    );
+
+    for (const row of rows) {
+      try {
+        const existingItem = existingItemsByEan.get(row.ean);
+
+        if (mode === ImportItemsMode.CREATE_ONLY && existingItem) {
+          this.addImportError(result, {
+            row: row.row,
+            ean: row.ean,
+            message: 'Ya existe un ítem registrado con ese EAN.',
+          });
+
+          continue;
+        }
+
+        const relationIds = await this.resolveImportRelations(
+          row,
+          relationCache,
+        );
+
+        if (existingItem) {
+          const updateData = ItemMapper.toUpdateDataFromImport(row);
+
+          const persistenceData = ItemMapper.toUpdatePersistence(
+            updateData,
+            relationIds,
+          );
+
+          await this.itemRepository.updateById(
+            existingItem.id,
+            persistenceData,
+          );
+
+          result.updated++;
+          continue;
+        }
+
+        const createData = ItemMapper.toCreateDataFromImport(row);
+
+        const persistenceData = ItemMapper.toCreatePersistence(
+          createData,
+          relationIds,
+        );
+
+        await this.itemRepository.create(persistenceData);
+
+        result.created++;
+      } catch (error: unknown) {
+        this.addImportError(result, {
+          row: row.row,
+          ean: row.ean,
+          message: this.getImportErrorMessage(error),
+        });
+      }
+    }
+  }
+
+  private async resolveImportRelations(
+    itemData: ImportItemData,
+    cache: ImportRelationCache,
+  ): Promise<ImportRelationIds> {
+    const itemType = itemData.itemTypeCode
+      ? await this.getCached(cache.itemTypes, itemData.itemTypeCode, () =>
+          this.itemTypeService.findByCode(itemData.itemTypeCode!),
+        )
+      : null;
+
+    if (itemData.itemTypeCode && !itemType) {
+      throw new BadRequestException('El tipo de ítem indicado no existe.');
+    }
+
+    const brand = itemData.brandName
+      ? await this.getCached(cache.brands, itemData.brandName, () =>
+          this.brandService.resolveOrCreateByName(itemData.brandName!),
+        )
+      : null;
+
+    const category = itemData.categoryName
+      ? await this.getCached(cache.categories, itemData.categoryName, () =>
+          this.categoryService.findByName(itemData.categoryName!),
+        )
+      : null;
+
+    if (itemData.categoryName && !category) {
+      throw new BadRequestException('La categoría indicada no existe.');
+    }
+
+    const unit = itemData.unitAbbreviation
+      ? await this.getCached(cache.units, itemData.unitAbbreviation, () =>
+          this.unitOfMeasureService.findByAbbreviation(
+            itemData.unitAbbreviation!,
+          ),
+        )
+      : null;
+
+    if (itemData.unitAbbreviation && !unit) {
+      throw new BadRequestException('La unidad de medida indicada no existe.');
+    }
+
+    return {
+      itemTypeId: itemType?.id,
+      brandId: brand?.id,
+      categoryId: category?.id,
+      unitId: unit?.id,
+    };
+  }
+
+  private createImportRelationCache(): ImportRelationCache {
+    return {
+      itemTypes: new Map<string, ItemTypeResponseDto | null>(),
+      brands: new Map<string, BrandResponseDto | null>(),
+      categories: new Map<string, CategoryResponseDto | null>(),
+      units: new Map<string, UnitOfMeasureResponseDto | null>(),
+    };
+  }
+
+  private async getCached<T>(
+    cache: Map<string, T | null>,
+    key: string,
+    loader: () => Promise<T | null>,
+  ): Promise<T | null> {
+    const normalizedKey = key.trim().toLowerCase();
+
+    if (cache.has(normalizedKey)) {
+      return cache.get(normalizedKey) ?? null;
+    }
+
+    const value = await loader();
+
+    cache.set(normalizedKey, value);
+
+    return value;
+  }
+
+  private parseImportRow(rawRow: RawImportItemRow): {
+    data?: ImportItemData;
+    error?: ImportItemsErrorDto;
+  } {
+    const errors: string[] = [];
+    const rowNumber = rawRow.__rowNumber;
+
+    const ean = this.getOptionalStringCell(rawRow, 'ean');
+
+    if (!ean) {
+      errors.push('ean es obligatorio.');
+    } else if (!/^\d{13}$/.test(ean)) {
+      errors.push('ean debe contener exactamente 13 dígitos.');
+    }
+
+    const name = this.getOptionalStringCell(rawRow, 'name');
+
+    if (!name) {
+      errors.push('name es obligatorio.');
+    } else if (name.length > 255) {
+      errors.push('name no puede superar los 255 caracteres.');
+    }
+
+    const itemTypeCode = this.getOptionalStringCell(rawRow, 'itemTypeCode');
+    this.validateMaxLength(itemTypeCode, 'itemTypeCode', 50, errors);
+
+    const description = this.getOptionalStringCell(rawRow, 'description');
+    this.validateMaxLength(description, 'description', 1000, errors);
+
+    const brandName = this.getOptionalStringCell(rawRow, 'brandName');
+    this.validateMaxLength(brandName, 'brandName', 100, errors);
+
+    const categoryName = this.getOptionalStringCell(rawRow, 'categoryName');
+    this.validateMaxLength(categoryName, 'categoryName', 100, errors);
+
+    const unitAbbreviation = this.getOptionalStringCell(
+      rawRow,
+      'unitAbbreviation',
+    );
+    this.validateMaxLength(unitAbbreviation, 'unitAbbreviation', 10, errors);
+
+    const quantity = this.getOptionalNumberCell(rawRow, 'quantity', errors);
+
+    const unitsPerPack = this.getOptionalIntegerCell(
+      rawRow,
+      'unitsPerPack',
+      errors,
+    );
+
+    const dimensions = this.getOptionalDimensions(rawRow, errors);
+
+    const metadata = this.getOptionalMetadata(rawRow, errors);
+
+    if (errors.length > 0) {
+      return {
+        error: {
+          row: rowNumber,
+          ean: ean ?? null,
+          message: errors.join(' '),
+        },
+      };
+    }
+
+    return {
+      data: {
+        row: rowNumber,
+        ean: ean!,
+        itemTypeCode,
+        name: name!,
+        description,
+        brandName,
+        categoryName,
+        quantity,
+        unitAbbreviation,
+        unitsPerPack,
+        dimensions,
+        metadata,
+      },
+    };
+  }
+
+  private getOptionalDimensions(
+    rawRow: RawImportItemRow,
+    errors: string[],
+  ): ImportItemData['dimensions'] {
+    const width = this.getOptionalNumberCell(rawRow, 'dimensionsWidth', errors);
+    const height = this.getOptionalNumberCell(
+      rawRow,
+      'dimensionsHeight',
+      errors,
+    );
+    const depth = this.getOptionalNumberCell(rawRow, 'dimensionsDepth', errors);
+    const unit = this.getOptionalStringCell(rawRow, 'dimensionsUnit');
+
+    this.validateMaxLength(unit, 'dimensionsUnit', 10, errors);
+
+    if (
+      width === undefined &&
+      height === undefined &&
+      depth === undefined &&
+      unit === undefined
+    ) {
+      return undefined;
+    }
+
+    return {
+      width,
+      height,
+      depth,
       unit,
-    });
+    };
+  }
+
+  private getOptionalMetadata(
+    rawRow: RawImportItemRow,
+    errors: string[],
+  ): Record<string, unknown> | undefined {
+    const metadataValue = this.getOptionalStringCell(rawRow, 'metadata');
+
+    if (!metadataValue) {
+      return undefined;
+    }
+
+    try {
+      const parsedMetadata = JSON.parse(metadataValue) as unknown;
+
+      if (
+        parsedMetadata &&
+        typeof parsedMetadata === 'object' &&
+        !Array.isArray(parsedMetadata)
+      ) {
+        return parsedMetadata as Record<string, unknown>;
+      }
+
+      errors.push('metadata debe ser un objeto JSON válido.');
+
+      return undefined;
+    } catch {
+      errors.push('metadata debe ser un JSON válido.');
+
+      return undefined;
+    }
+  }
+
+  private getOptionalNumberCell(
+    rawRow: RawImportItemRow,
+    columnName: string,
+    errors: string[],
+  ): number | undefined {
+    const value = this.getOptionalStringCell(rawRow, columnName);
+
+    if (value === undefined) {
+      return undefined;
+    }
+
+    const normalizedValue = value.replace(',', '.');
+    const numberValue = Number(normalizedValue);
+
+    if (!Number.isFinite(numberValue)) {
+      errors.push(`${columnName} debe ser un número válido.`);
+      return undefined;
+    }
+
+    if (numberValue < 0) {
+      errors.push(`${columnName} no puede ser negativo.`);
+      return undefined;
+    }
+
+    return numberValue;
+  }
+
+  private getOptionalIntegerCell(
+    rawRow: RawImportItemRow,
+    columnName: string,
+    errors: string[],
+  ): number | undefined {
+    const value = this.getOptionalStringCell(rawRow, columnName);
+
+    if (value === undefined) {
+      return undefined;
+    }
+
+    const numberValue = Number(value);
+
+    if (!Number.isInteger(numberValue)) {
+      errors.push(`${columnName} debe ser un número entero.`);
+      return undefined;
+    }
+
+    if (numberValue < 1) {
+      errors.push(`${columnName} debe ser mayor o igual a 1.`);
+      return undefined;
+    }
+
+    return numberValue;
+  }
+
+  private getOptionalStringCell(
+    rawRow: RawImportItemRow,
+    columnName: string,
+  ): string | undefined {
+    const columnKey = Object.keys(rawRow).find(
+      (key) =>
+        this.normalizeColumnName(key) === this.normalizeColumnName(columnName),
+    );
+
+    if (!columnKey) {
+      return undefined;
+    }
+
+    const value = rawRow[columnKey];
+
+    if (value === null || value === undefined) {
+      return undefined;
+    }
+
+    let stringValue: string;
+
+    if (typeof value === 'string') {
+      stringValue = value.trim();
+    } else if (
+      typeof value === 'number' ||
+      typeof value === 'boolean' ||
+      typeof value === 'bigint'
+    ) {
+      stringValue = value.toString().trim();
+    } else if (value instanceof Date) {
+      stringValue = value.toISOString();
+    } else {
+      return undefined;
+    }
+
+    if (!stringValue) {
+      return undefined;
+    }
+
+    return stringValue;
+  }
+
+  private normalizeColumnName(columnName: string): string {
+    return columnName
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+  }
+
+  private validateMaxLength(
+    value: string | undefined,
+    fieldName: string,
+    maxLength: number,
+    errors: string[],
+  ): void {
+    if (value !== undefined && value.length > maxLength) {
+      errors.push(`${fieldName} no puede superar los ${maxLength} caracteres.`);
+    }
+  }
+
+  private addImportError(
+    result: ImportItemsResponseDto,
+    error: ImportItemsErrorDto,
+  ): void {
+    result.errors.push(error);
+    result.failed = result.errors.length;
+  }
+
+  private getImportErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return 'Error desconocido al importar la fila.';
   }
 }

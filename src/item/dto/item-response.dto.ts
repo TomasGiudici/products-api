@@ -15,7 +15,7 @@ export class ItemResponseDto {
   quantity!: number | null;
   unitAbbreviation!: string | null;
 
-  imagePath!: string | null;
+  imageUrl!: string | null;
 
   dimensions!: ItemDimensionsDto | null;
   metadata!: Record<string, unknown> | null;
