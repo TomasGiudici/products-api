@@ -1,134 +1,49 @@
-# Catalog API
+# Products Catalog API
 
-API de catálogo de ítems.
+API de catálogo de productos. Permite consultar, crear, modificar, exportar e importar productos identificados por EAN.
 
-Permite registrar y consultar ítems mediante un tipo de identificador y un valor de identificador, junto con sus marcas, categorías, unidades de medida, metadata e imágenes. Está pensada para ser consumida principalmente por otros sistemas backend.
-
-La API no maneja precios, sucursales ni historial de precios.
-
-## Tecnologías
-
-- NestJS
-- Prisma
-- PostgreSQL / Supabase
-- Supabase Storage
+La API solo maneja información de catálogo: nombre, marca, categoría, unidad, imagen, descripción, dimensiones y metadata. No maneja precios, supermercados, sucursales ni historial de precios.
 
 ## Base URL
+
+Local:
+
+```http
+http://localhost:3000/catalog
+```
+
+Deploy:
 
 ```http
 https://tu-api-deployada.com/catalog
 ```
 
-## Variables de entorno
-
-Crear un archivo `.env` a partir de `.env.template`.
-
-### Descripción de variables
-
-| Variable | Descripción |
-|---|---|
-| `NODE_ENV` | Entorno de ejecución. Ejemplo: `development` o `production`. |
-| `DATABASE_URL` | URL de conexión a PostgreSQL/Supabase usada por Prisma. |
-| `PORT` | Puerto donde levanta la API. En producción puede ser asignado por el proveedor. |
-| `CORS_ORIGINS` | Orígenes permitidos para requests desde navegador. Separar múltiples URLs con coma. |
-| `API_KEY` | Clave privada requerida para endpoints de escritura. |
-| `SUPABASE_URL` | URL del proyecto de Supabase. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Clave service role de Supabase. Solo debe usarse en backend. |
-| `SUPABASE_PRODUCT_IMAGES_BUCKET` | Nombre del bucket de Supabase Storage donde se guardan imágenes de ítems/productos. |
-
 ## Autenticación
 
-Los endpoints de escritura (`POST` y `PATCH`) requieren API Key.
-
-Debe enviarse el siguiente header:
+Los endpoints protegidos requieren este header:
 
 ```http
 x-api-key: TU_API_KEY
 ```
 
-Los endpoints `GET` no requieren API Key.
+Los endpoints públicos de consulta no requieren API Key.
 
-Endpoints protegidos:
+## Respuesta de producto
 
-```http
-POST /items
-PATCH /items/:id
-POST /brand
-POST /category
-POST /unit-of-measure
-POST /identifier-types
-POST /item-types
-```
-
-Endpoints públicos:
-
-```http
-GET /health
-GET /items
-GET /items?brandName=:brandName
-GET /items?categoryName=:categoryName
-GET /items/:id
-GET /items/ean/:eanValue
-GET /items/ean/:eanValue/summary
-GET /brand
-GET /brand/:id
-GET /category
-GET /category/:id
-GET /unit-of-measure
-GET /unit-of-measure/:id
-GET /identifier-types
-GET /identifier-types/:id
-GET /item-types
-GET /item-types/:id
-```
-
-## Health check
-
-### GET `/health`
-
-Permite verificar que la API está activa.
-
-Ejemplo:
-
-```http
-GET http://localhost:3000/catalog/health
-```
-
-Respuesta:
+Los endpoints que devuelven productos usan esta estructura general:
 
 ```json
 {
-  "status": "ok",
-  "timestamp": "2026-07-13T15:00:00.000Z"
-}
-```
-
-## Ítems / productos
-
-### GET `/items/ean/:ean`
-
-Consulta un ítem por tipo de identificador y valor de identificador.
-
-Ejemplo:
-
-```http
-GET http://localhost:3000/catalog/items/ean/7790000000001
-```
-
-Respuesta:
-
-```json
-{
-  "id": "7d2b17fd-0f57-4f26-b57b-5a9bb81afeee",
+  "id": "uuid-del-producto",
   "ean": "7790000000001",
   "itemType": "Producto de supermercado",
-  "name": "Producto de prueba 500 ml",
-  "description": "Gaseosa sabor cola en botella de 500 ml.",
+  "name": "Coca Cola 500 ml",
+  "description": "Gaseosa sabor cola.",
   "brand": "Coca Cola",
   "category": "Bebidas",
   "quantity": 500,
   "unitAbbreviation": "ml",
-  "imagePath": "items/ean13-7790000000001.jpg",
+  "imageUrl": "https://...",
   "dimensions": {
     "width": 6.5,
     "height": 20,
@@ -142,279 +57,266 @@ Respuesta:
 }
 ```
 
-Los campos opcionales pueden responder `null`.
+Los campos opcionales pueden venir como `null`.
 
-Si el ítem no existe, responde `404 Not Found`.
+## Endpoints principales
 
-### GET `/items`
+| Método | Endpoint | API Key | Descripción |
+|---|---|---:|---|
+| `GET` | `/health` | No | Verifica que la API esté activa. |
+| `GET` | `/items` | No | Lista productos en JSON paginado. |
+| `GET` | `/items/ean/:ean` | No | Busca un producto por EAN. |
+| `GET` | `/items/ean/:ean/summary` | No | Devuelve una versión resumida del producto. |
+| `POST` | `/items` | Sí | Crea un producto. |
+| `PATCH` | `/items/:id` | Sí | Modifica un producto. |
+| `GET` | `/items/export` | Sí | Exporta productos en CSV. |
+| `POST` | `/items/import` | Sí | Importa productos desde CSV o XLSX. |
 
-Lista ítems. Puede usarse sin filtros o con filtros por marca y categoría.
+## Consultar productos
 
-Ejemplo sin filtros:
+### `GET /items`
 
-```http
-GET http://localhost:3000/catalog/items
-```
+Devuelve productos paginados. Cada página devuelve hasta 50 productos.
 
-Ejemplo filtrando por marca:
+Query params opcionales:
 
-```http
-GET http://localhost:3000/catalog/items?brandName=Coca%20Cola
-```
-
-Ejemplo filtrando por categoría:
-
-```http
-GET http://localhost:3000/catalog/items?categoryName=Bebidas
-```
-
-Ejemplo filtrando por marca y categoría:
-
-```http
-GET http://localhost:3000/catalog/items?brandName=Coca%20Cola&categoryName=Bebidas
-```
-
-Respuesta:
-
-```json
-[
-  {
-    "id": "7d2b17fd-0f57-4f26-b57b-5a9bb81afeee",
-    "ean": "7790000000001",
-    "itemType": "Producto de supermercado",
-    "name": "Producto de prueba 500 ml",
-    "description": "Gaseosa sabor cola en botella de 500 ml.",
-    "brand": "Coca Cola",
-    "category": "Bebidas",
-    "quantity": 500,
-    "unitAbbreviation": "ml",
-    "imagePath": "items/ean13-7790000000001.jpg",
-    "dimensions": {
-      "width": 6.5,
-      "height": 20,
-      "depth": 6.5,
-      "unit": "cm"
-    },
-    "metadata": {
-      "container": "bottle",
-      "flavor": "cola"
-    }
-  }
-]
-```
-
-### GET `/items/ean/:ean/summary`
-
-Consulta un ítem por identificador y devuelve una respuesta resumida.
+| Param | Descripción |
+|---|---|
+| `page` | Número de página. Si no se envía, usa `1`. |
+| `search` | Busca por nombre. |
+| `brandName` | Filtra por marca. |
+| `categoryName` | Filtra por categoría. |
 
 Ejemplo:
 
 ```http
-GET http://localhost:3000/catalog/items/ean/7790000000001/summary
+GET /catalog/items?page=1&search=coca&brandName=Coca%20Cola
 ```
 
 Respuesta:
 
 ```json
 {
-  "id": "7d2b17fd-0f57-4f26-b57b-5a9bb81afeee",
-  "name": "Producto de prueba 500 ml",
+  "data": [
+    {
+      "id": "uuid-del-producto",
+      "ean": "7790000000001",
+      "itemType": "Producto de supermercado",
+      "name": "Coca Cola 500 ml",
+      "description": "Gaseosa sabor cola.",
+      "brand": "Coca Cola",
+      "category": "Bebidas",
+      "quantity": 500,
+      "unitAbbreviation": "ml",
+      "imageUrl": "https://...",
+      "dimensions": null,
+      "metadata": null
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 50,
+    "total": 120,
+    "totalPages": 3,
+    "hasNextPage": true,
+    "hasPreviousPage": false
+  }
+}
+```
+
+### `GET /items/ean/:ean`
+
+Busca un producto exacto por código EAN.
+
+```http
+GET /catalog/items/ean/7790000000001
+```
+
+Devuelve un producto completo. Si no existe, responde `404`.
+
+### `GET /items/ean/:ean/summary`
+
+Devuelve solo datos mínimos:
+
+```json
+{
+  "id": "uuid-del-producto",
+  "name": "Coca Cola 500 ml",
   "brand": "Coca Cola"
 }
 ```
 
-### POST `/items`
+## Crear productos
 
-Crea un ítem. Para registrar un producto de supermercado, se usa normalmente `itemTypeCode: "SUPERMARKET_PRODUCT"`.
+### `POST /items`
 
-Requiere API Key.
+Crea un producto. Requiere API Key.
 
-Este endpoint acepta `application/json`. También acepta `multipart/form-data` si se envía una imagen.
-
-Campos:
-
-| Campo | Tipo | Requerido | Descripción |
-|---|---|---|---|
-| `ean` | string | Sí | Valor del identificador. Para `EAN13`, sería el código de barras del producto. |
-| `name` | string | Sí | Nombre del ítem/producto. |
-| `itemTypeCode` | string | No | Código del tipo de ítem. Si se informa, debe existir previamente. Ejemplo: `SUPERMARKET_PRODUCT`. |
-| `description` | string | No | Descripción del ítem/producto. |
-| `brandName` | string | No | Nombre de la marca. Si no existe, se crea automáticamente. |
-| `categoryName` | string | No | Nombre de la categoría. Si se informa, debe existir previamente. |
-| `quantity` | number | No | Cantidad del producto. Ejemplo: `500`, `1.5`. |
-| `unitAbbreviation` | string | No | Abreviatura de unidad de medida. Ejemplo: `ml`, `g`, `kg`. Debe existir previamente si se informa. |
-| `unitsPerPack` | number | No | Unidades por pack. |
-| `dimensions` | object | No | Objeto JSON con dimensiones del ítem/producto. |
-| `metadata` | object | No | Objeto JSON con información específica del ítem/producto. |
-| `image` | file | No | Imagen del ítem/producto. Solo para `multipart/form-data`. Formatos permitidos: JPG, PNG o WEBP. |
-
-Ejemplo JSON sin imagen:
+Body mínimo:
 
 ```json
 {
   "ean": "7790000000001",
-  "itemTypeCode": "SUPERMARKET_PRODUCT",
-  "name": "Producto de prueba 500 ml",
-  "description": "Gaseosa sabor cola en botella de 500 ml.",
-  "brandName": "Coca Cola",
-  "categoryName": "Bebidas",
-  "quantity": 500,
-  "unitAbbreviation": "ml",
-  "unitsPerPack": 1,
-  "dimensions": {
-    "width": 6.5,
-    "height": 20,
-    "depth": 6.5,
-    "unit": "cm"
-  },
-  "metadata": {
-    "container": "bottle",
-    "flavor": "cola"
-  }
+  "name": "Coca Cola 500 ml"
 }
 ```
 
-Notas importantes:
+Campos aceptados:
 
-- El tipo de identificador debe existir previamente.
-- El tipo de ítem debe existir previamente si se informa `itemTypeCode`.
-- La marca se crea automáticamente si no existe.
-- La categoría debe existir previamente si se informa `categoryName`.
-- La unidad de medida debe existir previamente si se informa `unitAbbreviation`.
-- La descripción es opcional.
-- Las dimensiones son opcionales.
-- La metadata es opcional.
-- La imagen es opcional.
-- Si se envía imagen, la API la sube a Supabase Storage.
-- En la base de datos se guarda solo el `imagePath`, no el archivo completo.
-- Si la imagen se sube correctamente pero falla la creación del ítem/producto, la API intenta borrar la imagen para evitar archivos huérfanos.
+| Campo | Requerido | Descripción |
+|---|---:|---|
+| `ean` | Sí | Código EAN de 13 dígitos. |
+| `name` | Sí | Nombre del producto. |
+| `itemTypeCode` | No | Tipo de producto. Debe existir previamente si se envía. |
+| `description` | No | Descripción del producto. |
+| `brandName` | No | Marca. Si no existe, se crea automáticamente. |
+| `categoryName` | No | Categoría. Debe existir previamente si se envía. |
+| `quantity` | No | Cantidad del producto. |
+| `unitAbbreviation` | No | Unidad de medida. Debe existir previamente si se envía. |
+| `unitsPerPack` | No | Unidades por pack. |
+| `dimensions` | No | Objeto con `width`, `height`, `depth` y `unit`. |
+| `metadata` | No | Objeto JSON libre. |
+| `image` | No | Imagen enviada por `multipart/form-data`. |
 
-Respuesta esperada:
+Para crear con imagen, enviar `multipart/form-data` usando el campo `image`. Formatos permitidos: JPG, PNG y WEBP. Tamaño máximo: 2 MB.
+
+## Modificar productos
+
+### `PATCH /items/:id`
+
+Modifica un producto existente. Requiere API Key.
 
 ```json
 {
-  "id": "7d2b17fd-0f57-4f26-b57b-5a9bb81afeee",
-  "ean": "7790000000001",
-  "itemType": "Producto de supermercado",
-  "name": "Producto de prueba 500 ml",
-  "description": "Gaseosa sabor cola en botella de 500 ml.",
-  "brand": "Coca Cola",
-  "category": "Bebidas",
-  "quantity": 500,
-  "unitAbbreviation": "ml",
-  "imagePath": "items/ean13-7790000000001.jpg",
-  "dimensions": {
-    "width": 6.5,
-    "height": 20,
-    "depth": 6.5,
-    "unit": "cm"
-  },
-  "metadata": {
-    "container": "bottle",
-    "flavor": "cola"
-  }
+  "name": "Coca Cola 500 ml actualizada",
+  "description": "Nueva descripción."
 }
 ```
 
-## Marcas
+También acepta imagen por `multipart/form-data` en el campo `image`.
 
-- La API normaliza internamente el nombre para evitar duplicados equivalentes.
-- Ejemplo: `Coca Cola`, `coca-cola` y `CÓCA  COLA` se consideran equivalentes.
+## Exportar productos
 
-## Categorías
+### `GET /items/export`
 
-- La API normaliza internamente el nombre para evitar duplicados equivalentes.
-- Las categorías no se crean automáticamente al crear un ítem/producto. Deben existir previamente si se informan.
+Exporta productos en CSV. Requiere API Key.
 
-## Unidades de medida
+Acepta los mismos filtros que `GET /items`:
 
-- La abreviatura se normaliza internamente.
-- Ejemplo: `ML`, `ml` y `ml.` se consideran equivalentes.
-
-## Imágenes
-
-Las imágenes de ítems/productos se envían en el campo `image` del `multipart/form-data`.
-
-Formatos permitidos:
-
-```text
-image/jpeg
-image/png
-image/webp
+```http
+GET /catalog/items/export?brandName=Coca%20Cola
+x-api-key: TU_API_KEY
 ```
 
-Tamaño máximo:
+El CSV se genera por lotes para evitar cargar todos los productos en memoria.
+
+Columnas exportadas:
 
 ```text
-2 MB
+id,ean,itemType,name,description,brand,category,quantity,unitAbbreviation,imageUrl,dimensions,metadata
 ```
 
-La API guarda el archivo en Supabase Storage usando el tipo de identificador y el valor normalizado del identificador como nombre base.
+## Importar productos
 
-Ejemplo de `imagePath` guardado:
+### `POST /items/import`
+
+Importa productos desde un archivo CSV o XLSX. Requiere API Key.
+
+El archivo se envía como `multipart/form-data` en el campo `file`.
+
+Modos disponibles:
+
+| Modo | Descripción |
+|---|---|
+| `upsert` | Si el EAN existe, actualiza. Si no existe, crea. Es el modo por defecto. |
+| `createOnly` | Solo crea productos nuevos. Si el EAN ya existe, marca error. |
+
+Ejemplo:
+
+```http
+POST /catalog/items/import?mode=upsert
+x-api-key: TU_API_KEY
+file: productos.csv
+```
+
+Columnas aceptadas:
 
 ```text
-items/ean13-7790000000001.jpg
+ean,name,itemTypeCode,description,brandName,categoryName,quantity,unitAbbreviation,unitsPerPack,dimensionsWidth,dimensionsHeight,dimensionsDepth,dimensionsUnit,metadata
 ```
 
-La respuesta del ítem/producto devuelve `imagePath`, no una URL pública completa.
+Obligatorias:
 
-Si otro sistema necesita mostrar la imagen, debe resolver ese path según la configuración de Supabase Storage del proyecto.
+```text
+ean,name
+```
 
-## Códigos de error comunes
+Respuesta:
+
+```json
+{
+  "mode": "upsert",
+  "totalRows": 1500,
+  "processed": 1450,
+  "created": 1200,
+  "updated": 250,
+  "failed": 50,
+  "errors": [
+    {
+      "row": 17,
+      "ean": "779000000000X",
+      "message": "ean debe contener exactamente 13 dígitos."
+    }
+  ]
+}
+```
+
+## Catálogos auxiliares
+
+Estos endpoints sirven para consultar o cargar datos auxiliares usados por los productos.
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/brand` | Lista marcas. |
+| `POST` | `/brand` | Crea una marca. |
+| `GET` | `/brand/:id` | Busca una marca por ID. |
+| `GET` | `/category` | Lista categorías. |
+| `POST` | `/category` | Crea una categoría. |
+| `GET` | `/category/:id` | Busca una categoría por ID. |
+| `GET` | `/unit-of-measure` | Lista unidades de medida. |
+| `POST` | `/unit-of-measure` | Crea una unidad de medida. |
+| `GET` | `/unit-of-measure/:id` | Busca una unidad por ID. |
+| `GET` | `/item-types` | Lista tipos de producto. |
+| `POST` | `/item-types` | Crea un tipo de producto. Requiere API Key. |
+| `GET` | `/item-types/:id` | Busca un tipo de producto por ID. |
+
+Notas:
+
+- `brandName` se crea automáticamente al crear o importar productos.
+- `categoryName`, `unitAbbreviation` e `itemTypeCode` deben existir previamente si se envían.
+
+## Errores comunes
 
 | Código | Caso |
 |---:|---|
-| `400 Bad Request` | Datos inválidos, tipo de identificador inexistente, tipo de ítem inexistente, categoría inexistente, unidad inexistente o imagen inválida. |
-| `401 Unauthorized` | API Key faltante o inválida. |
-| `404 Not Found` | Recurso no encontrado. |
-| `409 Conflict` | Recurso duplicado, por ejemplo ítem/producto con identificador ya registrado. |
-| `500 Internal Server Error` | Error interno del servidor. |
-
-## CORS
-
-La variable `CORS_ORIGINS` solo afecta requests realizados desde navegadores.
-
-Las integraciones backend-to-backend no dependen de CORS.
-
-Si la API solo es consumida por otros backends, CORS no limita esas integraciones.
+| `400` | Datos inválidos, archivo inválido, categoría inexistente, unidad inexistente o tipo de producto inexistente. |
+| `401` | API Key faltante o inválida. |
+| `404` | Recurso no encontrado. |
+| `409` | Producto duplicado, por ejemplo un EAN ya registrado. |
+| `500` | Error interno del servidor. |
 
 ## Ejecución local
 
-Instalar dependencias:
-
 ```bash
 npm install
-```
-
-Generar Prisma Client:
-
-```bash
 npx prisma generate
-```
-
-Ejecutar en desarrollo:
-
-```bash
 npm run start:dev
 ```
 
-Compilar:
+Para compilar:
 
 ```bash
 npm run build
 ```
 
-Ejecutar versión compilada:
-
-```bash
-npm run start:prod
-```
-
-## Pruebas rápidas
-
-Health check:
-
-```http
-GET http://localhost:3000/catalog/health
-```
+Variables de entorno requeridas: ver `.env.template`.
