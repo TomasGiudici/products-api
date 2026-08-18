@@ -87,6 +87,8 @@ export interface ItemSummaryResponseRelations {
   brand: Pick<BrandResponseDto, 'name'> | null;
 }
 
+export type ItemSummarySource = Pick<ItemDetail, 'ean' | 'name'>;
+
 export interface ItemResponseComputedData {
   imageUrl: string | null;
 }
@@ -268,7 +270,7 @@ export class ItemMapper {
   }
 
   static toSummaryResponse(
-    item: ItemDetail,
+    item: ItemSummarySource,
     relations: ItemSummaryResponseRelations,
     computedData: ItemResponseComputedData,
   ): ItemSummaryResponseDto {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '../../generated/prisma/client';
+import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { ItemDetail } from '../interface/item-detail.interface';
 import type {
@@ -16,6 +16,8 @@ import type {
 
 @Injectable()
 export class ItemPrismaRepository implements IItemRepository {
+  private static readonly SEARCH_SIMILARITY_THRESHOLD = 0.4;
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<ItemDetail | null> {
@@ -81,32 +83,87 @@ export class ItemPrismaRepository implements IItemRepository {
     normalizedName: string,
     pagination: FindItemsPagination,
   ): Promise<SearchItemsResult> {
-    const where: Prisma.itemWhereInput = {
-      normalized_name: {
-        contains: normalizedName,
-      },
-    };
+    const threshold = ItemPrismaRepository.SEARCH_SIMILARITY_THRESHOLD;
+    const searchPattern = `%${normalizedName}%`;
 
-    const [items, total] = await Promise.all([
-      this.prisma.item.findMany({
-        where,
-        include: {
-          brand: true,
-        },
-        skip: pagination.skip,
-        take: pagination.take,
-        orderBy: [{ normalized_name: 'asc' }, { id: 'asc' }],
-      }),
-      this.prisma.item.count({ where }),
-    ]);
+    interface SearchItemRow {
+      ean: string;
+      name: string;
+      brandName: string | null;
+      imagePath: string | null;
+    }
 
-    return {
-      items: items.map((item) => ({
-        ...this.toItemDetail(item),
-        brandName: item.brand?.name ?? null,
-      })),
-      total,
-    };
+    interface SearchCountRow {
+      total: bigint | number;
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      /*
+       * Force pg_trgm to be loaded in this PostgreSQL session before
+       * configuring one of its GUC parameters.
+       */
+      await tx.$queryRaw(Prisma.sql`
+        SELECT word_similarity(${normalizedName}, ${normalizedName})
+      `);
+
+      /*
+       * Equivalent to SET LOCAL, but parameterizable.
+       * The third argument makes the setting valid only for this transaction.
+       */
+      await tx.$queryRaw(Prisma.sql`
+        SELECT set_config(
+          'pg_trgm.word_similarity_threshold',
+          ${threshold.toString()},
+          true
+        )
+      `);
+
+      const items = await tx.$queryRaw<SearchItemRow[]>(Prisma.sql`
+        SELECT
+          i.ean,
+          i.name,
+          b.name AS "brandName",
+          i.image_path AS "imagePath"
+        FROM catalog.items AS i
+        LEFT JOIN catalog.brands AS b ON b.id = i.brand_id
+        WHERE
+          i.normalized_name LIKE ${searchPattern}
+          OR ${normalizedName} <% i.normalized_name
+        ORDER BY
+          CASE
+            WHEN i.normalized_name = ${normalizedName} THEN 0
+            WHEN i.normalized_name LIKE ${searchPattern} THEN 1
+            ELSE 2
+          END ASC,
+          word_similarity(${normalizedName}, i.normalized_name) DESC,
+          i.normalized_name ASC,
+          i.id ASC
+        LIMIT ${pagination.take}
+        OFFSET ${pagination.skip}
+      `);
+
+      const countRows = await tx.$queryRaw<SearchCountRow[]>(Prisma.sql`
+        SELECT COUNT(*)::bigint AS total
+        FROM catalog.items AS i
+        WHERE
+          i.normalized_name LIKE ${searchPattern}
+          OR ${normalizedName} <% i.normalized_name
+      `);
+
+      const totalValue = countRows[0]?.total ?? 0;
+      const total = Number(totalValue);
+
+      if (!Number.isSafeInteger(total) || total < 0) {
+        throw new Error(
+          'Search result count is outside the safe integer range.',
+        );
+      }
+
+      return {
+        items,
+        total,
+      };
+    });
   }
 
   async findExportBatch(

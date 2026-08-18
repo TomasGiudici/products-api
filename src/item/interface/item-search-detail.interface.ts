@@ -1,5 +1,6 @@
-import type { ItemDetail } from './item-detail.interface';
-
-export interface ItemSearchDetail extends ItemDetail {
+export interface ItemSearchDetail {
+  ean: string;
+  name: string;
   brandName: string | null;
+  imagePath: string | null;
 }
