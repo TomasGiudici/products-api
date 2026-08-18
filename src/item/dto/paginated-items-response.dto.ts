@@ -1,4 +1,5 @@
 import { ItemResponseDto } from './item-response.dto';
+import { ItemSummaryResponseDto } from './item-summary-response.dto';
 
 export class PaginatedItemsMetaDto {
   page!: number;
@@ -11,5 +12,10 @@ export class PaginatedItemsMetaDto {
 
 export class PaginatedItemsResponseDto {
   data!: ItemResponseDto[];
+  meta!: PaginatedItemsMetaDto;
+}
+
+export class PaginatedItemSummariesResponseDto {
+  data!: ItemSummaryResponseDto[];
   meta!: PaginatedItemsMetaDto;
 }

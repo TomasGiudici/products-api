@@ -3,6 +3,7 @@ import type {
   UpdateItemPersistenceData,
 } from '../interface/item-persistence-data.interface';
 import type { ItemDetail } from '../interface/item-detail.interface';
+import type { ItemSearchDetail } from '../interface/item-search-detail.interface';
 
 export interface FindItemsFilters {
   brand_id?: number;
@@ -20,6 +21,11 @@ export interface FindItemsResult {
   total: number;
 }
 
+export interface SearchItemsResult {
+  items: ItemSearchDetail[];
+  total: number;
+}
+
 export interface IItemRepository {
   findById(id: string): Promise<ItemDetail | null>;
 
@@ -31,6 +37,11 @@ export interface IItemRepository {
     filters: FindItemsFilters,
     pagination: FindItemsPagination,
   ): Promise<FindItemsResult>;
+
+  searchByNormalizedName(
+    normalizedName: string,
+    pagination: FindItemsPagination,
+  ): Promise<SearchItemsResult>;
 
   create(data: CreateItemPersistenceData): Promise<ItemDetail>;
 

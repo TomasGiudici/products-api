@@ -1,5 +1,6 @@
 export class ItemSummaryResponseDto {
-  id!: string | null;
+  ean!: string | null;
   name!: string | null;
   brand!: string | null;
+  imageUrl!: string | null;
 }

@@ -24,9 +24,13 @@ import { ItemResponseDto } from './dto/item-response.dto';
 import { ItemSummaryResponseDto } from './dto/item-summary-response.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemService } from './item.service';
-import { PaginatedItemsResponseDto } from './dto/paginated-items-response.dto';
+import {
+  PaginatedItemSummariesResponseDto,
+  PaginatedItemsResponseDto,
+} from './dto/paginated-items-response.dto';
 import { ImportItemsQueryDto } from './dto/import-items-query.dto';
 import { ImportItemsResponseDto } from './dto/import-items-response.dto';
+import { SearchItemsQueryDto } from './dto/search-items-query.dto';
 
 @Controller('items')
 export class ItemController {
@@ -91,6 +95,13 @@ export class ItemController {
     @Query() filterItemsDto: FilterItemsDto,
   ): Promise<PaginatedItemsResponseDto> {
     return this.itemService.findAll(filterItemsDto);
+  }
+
+  @Get('search')
+  search(
+    @Query() searchItemsQueryDto: SearchItemsQueryDto,
+  ): Promise<PaginatedItemSummariesResponseDto> {
+    return this.itemService.search(searchItemsQueryDto);
   }
 
   @Get('ean/:ean/summary')

@@ -11,6 +11,7 @@ import type {
   FindItemsPagination,
   FindItemsResult,
   IItemRepository,
+  SearchItemsResult,
 } from './item.repository.interface';
 
 @Injectable()
@@ -72,6 +73,38 @@ export class ItemPrismaRepository implements IItemRepository {
 
     return {
       items: items.map((item) => this.toItemDetail(item)),
+      total,
+    };
+  }
+
+  async searchByNormalizedName(
+    normalizedName: string,
+    pagination: FindItemsPagination,
+  ): Promise<SearchItemsResult> {
+    const where: Prisma.itemWhereInput = {
+      normalized_name: {
+        contains: normalizedName,
+      },
+    };
+
+    const [items, total] = await Promise.all([
+      this.prisma.item.findMany({
+        where,
+        include: {
+          brand: true,
+        },
+        skip: pagination.skip,
+        take: pagination.take,
+        orderBy: [{ normalized_name: 'asc' }, { id: 'asc' }],
+      }),
+      this.prisma.item.count({ where }),
+    ]);
+
+    return {
+      items: items.map((item) => ({
+        ...this.toItemDetail(item),
+        brandName: item.brand?.name ?? null,
+      })),
       total,
     };
   }

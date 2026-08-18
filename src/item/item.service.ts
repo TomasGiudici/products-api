@@ -16,7 +16,10 @@ import { UnitOfMeasureResponseDto } from '../unit-of-measure/dto/unit-of-measure
 import { UnitOfMeasureService } from '../unit-of-measure/unit-of-measure.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { FilterItemsDto } from './dto/filter-items.dto';
-import { PaginatedItemsResponseDto } from './dto/paginated-items-response.dto';
+import {
+  PaginatedItemSummariesResponseDto,
+  PaginatedItemsResponseDto,
+} from './dto/paginated-items-response.dto';
 import { FindItemByEanDto } from './dto/find-item-by-ean.dto';
 import { FindItemByIdDto } from './dto/find-item-by-id.dto';
 import { ItemResponseDto } from './dto/item-response.dto';
@@ -40,6 +43,8 @@ import type {
   ImportItemData,
   RawImportItemRow,
 } from './interface/import-item-data.interface';
+import { normalizeText } from '../common/utils/normalize-text.util';
+import { SearchItemsQueryDto } from './dto/search-items-query.dto';
 
 interface ImportRelationIds {
   itemTypeId?: number;
@@ -268,6 +273,50 @@ export class ItemService {
     };
   }
 
+  async search(
+    searchItemsQueryDto: SearchItemsQueryDto,
+  ): Promise<PaginatedItemSummariesResponseDto> {
+    const normalizedName = normalizeText(searchItemsQueryDto.query);
+
+    if (normalizedName.length < 2) {
+      throw new BadRequestException(
+        'query debe contener al menos 2 caracteres útiles.',
+      );
+    }
+
+    const { page, limit } = searchItemsQueryDto;
+    const result = await this.itemRepository.searchByNormalizedName(
+      normalizedName,
+      {
+        skip: (page - 1) * limit,
+        take: limit,
+      },
+    );
+    const totalPages = Math.ceil(result.total / limit);
+
+    return {
+      data: result.items.map((item) =>
+        ItemMapper.toSummaryResponse(
+          item,
+          {
+            brand: item.brandName === null ? null : { name: item.brandName },
+          },
+          {
+            imageUrl: this.storageService.getPublicItemImageUrl(item.imagePath),
+          },
+        ),
+      ),
+      meta: {
+        page,
+        limit,
+        total: result.total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
   async findById(findItemByIdDto: FindItemByIdDto): Promise<ItemResponseDto> {
     const item = await this.itemRepository.findById(findItemByIdDto.id);
 
@@ -296,9 +345,13 @@ export class ItemService {
         ? await this.brandService.findById(item.brandId)
         : null;
 
-    return ItemMapper.toSummaryResponse(item, {
-      brand,
-    });
+    return ItemMapper.toSummaryResponse(
+      item,
+      { brand },
+      {
+        imageUrl: this.storageService.getPublicItemImageUrl(item.imagePath),
+      },
+    );
   }
 
   private async findItemDetailByEan(
