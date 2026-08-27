@@ -166,6 +166,84 @@ export class ItemPrismaRepository implements IItemRepository {
     });
   }
 
+  async searchByCandidateEans(
+    normalizedName: string,
+    eans: string[],
+    pagination: FindItemsPagination,
+  ): Promise<SearchItemsResult> {
+    if (eans.length === 0) {
+      return { items: [], total: 0 };
+    }
+
+    const threshold = ItemPrismaRepository.SEARCH_SIMILARITY_THRESHOLD;
+    const searchPattern = `%${normalizedName}%`;
+
+    interface SearchItemRow {
+      ean: string;
+      name: string;
+      brandName: string | null;
+      imagePath: string | null;
+    }
+
+    interface SearchCountRow {
+      total: bigint | number;
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw(Prisma.sql`
+        SELECT word_similarity(${normalizedName}, ${normalizedName})
+      `);
+      await tx.$queryRaw(Prisma.sql`
+        SELECT set_config(
+          'pg_trgm.word_similarity_threshold',
+          ${threshold.toString()},
+          true
+        )
+      `);
+
+      const candidateFilter = Prisma.sql`i.ean IN (${Prisma.join(eans)})`;
+      const nameFilter = Prisma.sql`(
+        i.normalized_name LIKE ${searchPattern}
+        OR ${normalizedName} <% i.normalized_name
+      )`;
+      const items = await tx.$queryRaw<SearchItemRow[]>(Prisma.sql`
+        SELECT
+          i.ean,
+          i.name,
+          b.name AS "brandName",
+          i.image_path AS "imagePath"
+        FROM catalog.items AS i
+        LEFT JOIN catalog.brands AS b ON b.id = i.brand_id
+        WHERE ${candidateFilter} AND ${nameFilter}
+        ORDER BY
+          CASE
+            WHEN i.normalized_name = ${normalizedName} THEN 0
+            WHEN i.normalized_name LIKE ${searchPattern} THEN 1
+            ELSE 2
+          END ASC,
+          word_similarity(${normalizedName}, i.normalized_name) DESC,
+          i.normalized_name ASC,
+          i.id ASC
+        LIMIT ${pagination.take}
+        OFFSET ${pagination.skip}
+      `);
+      const countRows = await tx.$queryRaw<SearchCountRow[]>(Prisma.sql`
+        SELECT COUNT(*)::bigint AS total
+        FROM catalog.items AS i
+        WHERE ${candidateFilter} AND ${nameFilter}
+      `);
+      const total = Number(countRows[0]?.total ?? 0);
+
+      if (!Number.isSafeInteger(total) || total < 0) {
+        throw new Error(
+          'Search result count is outside the safe integer range.',
+        );
+      }
+
+      return { items, total };
+    });
+  }
+
   async findExportBatch(
     filters: FindItemsFilters,
     pagination: FindItemsPagination,

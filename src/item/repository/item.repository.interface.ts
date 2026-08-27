@@ -43,6 +43,12 @@ export interface IItemRepository {
     pagination: FindItemsPagination,
   ): Promise<SearchItemsResult>;
 
+  searchByCandidateEans(
+    normalizedName: string,
+    eans: string[],
+    pagination: FindItemsPagination,
+  ): Promise<SearchItemsResult>;
+
   create(data: CreateItemPersistenceData): Promise<ItemDetail>;
 
   updateById(id: string, data: UpdateItemPersistenceData): Promise<ItemDetail>;

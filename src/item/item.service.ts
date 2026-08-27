@@ -45,6 +45,7 @@ import type {
 } from './interface/import-item-data.interface';
 import { normalizeText } from '../common/utils/normalize-text.util';
 import { SearchItemsQueryDto } from './dto/search-items-query.dto';
+import { SearchItemsByCandidatesDto } from './dto/search-items-by-candidates.dto';
 
 interface ImportRelationIds {
   itemTypeId?: number;
@@ -292,6 +293,80 @@ export class ItemService {
         take: limit,
       },
     );
+    const totalPages = Math.ceil(result.total / limit);
+
+    return {
+      data: result.items.map((item) =>
+        ItemMapper.toSummaryResponse(
+          item,
+          {
+            brand: item.brandName === null ? null : { name: item.brandName },
+          },
+          {
+            imageUrl: this.storageService.getPublicItemImageUrl(item.imagePath),
+          },
+        ),
+      ),
+      meta: {
+        page,
+        limit,
+        total: result.total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async searchByCandidates(
+    dto: SearchItemsByCandidatesDto,
+  ): Promise<PaginatedItemSummariesResponseDto> {
+    const normalizedName = normalizeText(dto.query);
+
+    if (normalizedName.length < 2) {
+      throw new BadRequestException(
+        'query debe contener al menos 2 caracteres Ãºtiles.',
+      );
+    }
+
+    if (dto.eans.length === 0) {
+      return this.emptyItemSummarySearch(dto.page, dto.limit);
+    }
+
+    const result = await this.itemRepository.searchByCandidateEans(
+      normalizedName,
+      Array.from(new Set(dto.eans)),
+      {
+        skip: (dto.page - 1) * dto.limit,
+        take: dto.limit,
+      },
+    );
+
+    return this.toPaginatedItemSummaryResponse(result, dto.page, dto.limit);
+  }
+
+  private emptyItemSummarySearch(
+    page: number,
+    limit: number,
+  ): PaginatedItemSummariesResponseDto {
+    return {
+      data: [],
+      meta: {
+        page,
+        limit,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  private toPaginatedItemSummaryResponse(
+    result: Awaited<ReturnType<IItemRepository['searchByCandidateEans']>>,
+    page: number,
+    limit: number,
+  ): PaginatedItemSummariesResponseDto {
     const totalPages = Math.ceil(result.total / limit);
 
     return {

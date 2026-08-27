@@ -4,8 +4,12 @@ import type { IItemRepository } from './repository/item.repository.interface';
 
 describe('ItemService search', () => {
   const searchByNormalizedName = jest.fn();
+  const searchByCandidateEans = jest.fn();
   const getPublicItemImageUrl = jest.fn().mockReturnValue(null);
-  const repository = { searchByNormalizedName } as unknown as IItemRepository;
+  const repository = {
+    searchByNormalizedName,
+    searchByCandidateEans,
+  } as unknown as IItemRepository;
   const unusedService = {} as never;
   const service = new ItemService(
     repository,
@@ -111,5 +115,52 @@ describe('ItemService search', () => {
       BadRequestException,
     );
     expect(searchByNormalizedName).not.toHaveBeenCalled();
+  });
+
+  it('searches normalized text only within unique candidate EANs', async () => {
+    searchByCandidateEans.mockResolvedValue({ items: [], total: 21 });
+
+    const result = await service.searchByCandidates({
+      query: ' ALFAJOR ',
+      eans: ['7791234567890', '7791234567890', '7791234567891'],
+      page: 2,
+      limit: 20,
+    });
+
+    expect(searchByCandidateEans).toHaveBeenCalledWith(
+      'alfajor',
+      ['7791234567890', '7791234567891'],
+      { skip: 20, take: 20 },
+    );
+    expect(result.meta).toEqual({
+      page: 2,
+      limit: 20,
+      total: 21,
+      totalPages: 2,
+      hasNextPage: false,
+      hasPreviousPage: true,
+    });
+  });
+
+  it('returns an empty candidate result without querying the repository', async () => {
+    await expect(
+      service.searchByCandidates({
+        query: 'alfajor',
+        eans: [],
+        page: 1,
+        limit: 20,
+      }),
+    ).resolves.toEqual({
+      data: [],
+      meta: {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    });
+    expect(searchByCandidateEans).not.toHaveBeenCalled();
   });
 });

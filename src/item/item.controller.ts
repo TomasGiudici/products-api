@@ -31,6 +31,7 @@ import {
 import { ImportItemsQueryDto } from './dto/import-items-query.dto';
 import { ImportItemsResponseDto } from './dto/import-items-response.dto';
 import { SearchItemsQueryDto } from './dto/search-items-query.dto';
+import { SearchItemsByCandidatesDto } from './dto/search-items-by-candidates.dto';
 
 @Controller('items')
 export class ItemController {
@@ -102,6 +103,13 @@ export class ItemController {
     @Query() searchItemsQueryDto: SearchItemsQueryDto,
   ): Promise<PaginatedItemSummariesResponseDto> {
     return this.itemService.search(searchItemsQueryDto);
+  }
+
+  @Post('search/candidates')
+  searchByCandidates(
+    @Body() dto: SearchItemsByCandidatesDto,
+  ): Promise<PaginatedItemSummariesResponseDto> {
+    return this.itemService.searchByCandidates(dto);
   }
 
   @Get('ean/:ean/summary')
