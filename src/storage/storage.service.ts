@@ -2,12 +2,15 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient } from '@supabase/supabase-js';
+import sharp from 'sharp';
 
 @Injectable()
 export class StorageService {
+  private readonly logger = new Logger(StorageService.name);
   private readonly supabase: ReturnType<typeof createClient>;
   private readonly productImagesBucket: string;
 
@@ -29,15 +32,13 @@ export class StorageService {
     ean: string,
     file: Express.Multer.File,
   ): Promise<string> {
-    this.validateImage(file);
-
-    const extension = this.getImageExtension(file.mimetype);
-    const imagePath = `items/${ean}.${extension}`;
+    const processedImage = await this.processImage(file);
+    const imagePath = `items/${ean}.jpg`;
 
     const { error } = await this.supabase.storage
       .from(this.productImagesBucket)
-      .upload(imagePath, file.buffer, {
-        contentType: file.mimetype,
+      .upload(imagePath, processedImage, {
+        contentType: 'image/jpeg',
         upsert: false,
       });
 
@@ -54,17 +55,15 @@ export class StorageService {
     ean: string,
     file: Express.Multer.File,
   ): Promise<string> {
-    this.validateImage(file);
-
-    const extension = this.getImageExtension(file.mimetype);
+    const processedImage = await this.processImage(file);
     const timestamp = Date.now();
 
-    const imagePath = `items/${ean}-${timestamp}.${extension}`;
+    const imagePath = `items/${ean}-${timestamp}.jpg`;
 
     const { error } = await this.supabase.storage
       .from(this.productImagesBucket)
-      .upload(imagePath, file.buffer, {
-        contentType: file.mimetype,
+      .upload(imagePath, processedImage, {
+        contentType: 'image/jpeg',
         upsert: false,
       });
 
@@ -78,16 +77,25 @@ export class StorageService {
   }
 
   async deleteItemImage(imagePath: string): Promise<void> {
-    const { error } = await this.supabase.storage
-      .from(this.productImagesBucket)
-      .remove([imagePath]);
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      const { error } = await this.supabase.storage
+        .from(this.productImagesBucket)
+        .remove([imagePath]);
 
-    if (error) {
-      return;
+      if (!error) return;
+
+      const log = {
+        event: 'item-image-delete-failed',
+        imagePath,
+        attempt,
+        error: error.message,
+      };
+      if (attempt < 3) this.logger.warn(log);
+      else this.logger.error(log);
     }
   }
 
-  private validateImage(file: Express.Multer.File): void {
+  private async processImage(file: Express.Multer.File): Promise<Buffer> {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
     if (!allowedMimeTypes.includes(file.mimetype)) {
@@ -99,22 +107,83 @@ export class StorageService {
     if (file.size > maxSizeInBytes) {
       throw new BadRequestException('La imagen no puede superar los 2 MB.');
     }
+
+    const detectedMimeType = this.detectImageMimeType(file.buffer);
+    if (!detectedMimeType || detectedMimeType !== file.mimetype) {
+      throw new BadRequestException(
+        'El contenido de la imagen no coincide con su formato.',
+      );
+    }
+
+    try {
+      const input = sharp(file.buffer, {
+        failOn: 'warning',
+        limitInputPixels: 16_000_000,
+      });
+      const metadata = await input.metadata();
+      if (!metadata.width || !metadata.height) {
+        throw new BadRequestException(
+          'La imagen no posee dimensiones válidas.',
+        );
+      }
+
+      for (const quality of [82, 72, 62]) {
+        const output = await sharp(file.buffer, {
+          failOn: 'warning',
+          limitInputPixels: 16_000_000,
+        })
+          .rotate()
+          .resize({
+            width: 1600,
+            height: 1600,
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .jpeg({ quality, mozjpeg: true })
+          .toBuffer();
+
+        if (output.length <= maxSizeInBytes) return output;
+      }
+    } catch (error: unknown) {
+      if (error instanceof BadRequestException) throw error;
+      this.logger.warn({
+        event: 'item-image-processing-rejected',
+        error: error instanceof Error ? error.message : 'unknown',
+      });
+      throw new BadRequestException('La imagen está dañada o no es válida.');
+    }
+
+    throw new BadRequestException(
+      'No se pudo reducir la imagen por debajo de 2 MB.',
+    );
   }
 
-  private getImageExtension(mimeType: string): string {
-    if (mimeType === 'image/jpeg') {
-      return 'jpg';
+  private detectImageMimeType(buffer: Buffer): string | null {
+    if (
+      buffer.length >= 3 &&
+      buffer[0] === 0xff &&
+      buffer[1] === 0xd8 &&
+      buffer[2] === 0xff
+    ) {
+      return 'image/jpeg';
     }
 
-    if (mimeType === 'image/png') {
-      return 'png';
+    const pngSignature = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
+    if (buffer.length >= 8 && buffer.subarray(0, 8).equals(pngSignature)) {
+      return 'image/png';
     }
 
-    if (mimeType === 'image/webp') {
-      return 'webp';
+    if (
+      buffer.length >= 12 &&
+      buffer.subarray(0, 4).toString('ascii') === 'RIFF' &&
+      buffer.subarray(8, 12).toString('ascii') === 'WEBP'
+    ) {
+      return 'image/webp';
     }
 
-    throw new BadRequestException('Formato de imagen no soportado.');
+    return null;
   }
 
   getPublicItemImageUrl(imagePath: string | null | undefined): string | null {

@@ -1,6 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsInt,
+  IsEAN,
   IsNotEmpty,
   IsNumber,
   IsObject,
@@ -18,6 +19,7 @@ export class CreateItemDto {
   @Matches(/^\d{13}$/, {
     message: 'ean debe contener exactamente 13 dígitos.',
   })
+  @IsEAN({ message: 'ean no posee un dígito verificador válido.' })
   ean!: string;
 
   @IsOptional()
@@ -48,6 +50,12 @@ export class CreateItemDto {
     message: 'brandName no puede superar los 100 caracteres.',
   })
   brandName?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  brandId?: number;
 
   @IsOptional()
   @IsString()

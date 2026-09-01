@@ -26,6 +26,7 @@ export interface CreateItemData {
   description?: string;
 
   brandName?: string;
+  brandId?: number;
   categoryName?: string;
 
   quantity?: number;
@@ -107,6 +108,7 @@ export class ItemMapper {
       description: createItemDto.description?.trim(),
 
       brandName: createItemDto.brandName?.trim(),
+      brandId: createItemDto.brandId,
       categoryName: createItemDto.categoryName?.trim(),
 
       quantity: createItemDto.quantity,

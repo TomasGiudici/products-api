@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { RepositoryUniqueConstraintError } from '../../common/errors/repository.errors';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { ItemDetail } from '../interface/item-detail.interface';
@@ -288,31 +289,41 @@ export class ItemPrismaRepository implements IItemRepository {
   }
 
   async create(data: CreateItemPersistenceData): Promise<ItemDetail> {
-    const item = await this.prisma.item.create({
-      data: {
-        ean: data.ean,
+    try {
+      const item = await this.prisma.item.create({
+        data: {
+          ean: data.ean,
 
-        item_type_id: data.item_type_id,
+          item_type_id: data.item_type_id,
 
-        name: data.name,
-        normalized_name: data.normalized_name,
-        description: data.description,
+          name: data.name,
+          normalized_name: data.normalized_name,
+          description: data.description,
 
-        brand_id: data.brand_id,
-        category_id: data.category_id,
+          brand_id: data.brand_id,
+          category_id: data.category_id,
 
-        quantity: data.quantity,
-        unit_id: data.unit_id,
-        units_per_pack: data.units_per_pack,
+          quantity: data.quantity,
+          unit_id: data.unit_id,
+          units_per_pack: data.units_per_pack,
 
-        image_path: data.image_path,
+          image_path: data.image_path,
 
-        dimensions: data.dimensions as Prisma.InputJsonValue | undefined,
-        metadata: data.metadata as Prisma.InputJsonValue | undefined,
-      },
-    });
+          dimensions: data.dimensions as Prisma.InputJsonValue | undefined,
+          metadata: data.metadata as Prisma.InputJsonValue | undefined,
+        },
+      });
 
-    return this.toItemDetail(item);
+      return this.toItemDetail(item);
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new RepositoryUniqueConstraintError();
+      }
+      throw error;
+    }
   }
 
   async updateById(

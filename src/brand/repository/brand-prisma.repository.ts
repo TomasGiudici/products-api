@@ -47,4 +47,26 @@ export class BrandPrismaRepository implements IBrandRepository {
       },
     });
   }
+
+  async searchByNormalizedName(
+    normalizedName: string,
+    limit: number,
+  ): Promise<Brand[]> {
+    const startingMatches = await this.prisma.brand.findMany({
+      where: { normalized_name: { startsWith: normalizedName } },
+      orderBy: { name: 'asc' },
+      take: limit,
+    });
+    if (startingMatches.length === limit) return startingMatches;
+
+    const remainingMatches = await this.prisma.brand.findMany({
+      where: {
+        normalized_name: { contains: normalizedName },
+        id: { notIn: startingMatches.map((brand) => brand.id) },
+      },
+      orderBy: { name: 'asc' },
+      take: limit - startingMatches.length,
+    });
+    return [...startingMatches, ...remainingMatches];
+  }
 }

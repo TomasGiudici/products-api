@@ -3,6 +3,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { BrandResponseDto } from '../brand/dto/brand-response.dto';
@@ -46,6 +47,7 @@ import type {
 import { normalizeText } from '../common/utils/normalize-text.util';
 import { SearchItemsQueryDto } from './dto/search-items-query.dto';
 import { SearchItemsByCandidatesDto } from './dto/search-items-by-candidates.dto';
+import { RepositoryUniqueConstraintError } from '../common/errors/repository.errors';
 
 interface ImportRelationIds {
   itemTypeId?: number;
@@ -63,6 +65,7 @@ interface ImportRelationCache {
 
 @Injectable()
 export class ItemService {
+  private readonly logger = new Logger(ItemService.name);
   private static readonly ITEMS_PAGE_SIZE = 50;
   private static readonly CSV_BATCH_SIZE = 500;
   private static readonly IMPORT_BATCH_SIZE = 500;
@@ -79,12 +82,25 @@ export class ItemService {
   async createItem(
     createItemDto: CreateItemDto,
     image?: Express.Multer.File,
+    registrationId?: string,
   ): Promise<ItemResponseDto> {
     const createData = ItemMapper.toCreateData(createItemDto);
+    const logContext = {
+      registrationId: this.normalizeRegistrationId(registrationId),
+      ean: createData.ean,
+    };
+    this.logger.log({
+      event: 'catalog-item-registration-started',
+      ...logContext,
+    });
 
     const existingItem = await this.itemRepository.findByEan(createData.ean);
 
     if (existingItem) {
+      this.logger.warn({
+        event: 'catalog-item-registration-already-exists',
+        ...logContext,
+      });
       throw new ConflictException('Ya existe un ítem registrado con ese EAN.');
     }
 
@@ -96,9 +112,30 @@ export class ItemService {
       throw new BadRequestException('El tipo de ítem indicado no existe.');
     }
 
-    const brand = createData.brandName
-      ? await this.brandService.resolveOrCreateByName(createData.brandName)
-      : null;
+    if (
+      createData.brandId !== undefined &&
+      createData.brandName !== undefined
+    ) {
+      throw new BadRequestException(
+        'No puede indicar brandId y brandName juntos.',
+      );
+    }
+
+    let brand: BrandResponseDto | null = null;
+    if (createData.brandId !== undefined) {
+      try {
+        brand = await this.brandService.findById(createData.brandId);
+      } catch (error: unknown) {
+        if (error instanceof NotFoundException) {
+          throw new BadRequestException('La marca indicada no existe.');
+        }
+        throw error;
+      }
+    } else if (createData.brandName) {
+      brand = await this.brandService.resolveOrCreateByName(
+        createData.brandName,
+      );
+    }
 
     const category = createData.categoryName
       ? await this.categoryService.findByName(createData.categoryName)
@@ -137,15 +174,43 @@ export class ItemService {
       );
 
       const createdItem = await this.itemRepository.create(persistenceData);
-
-      return this.buildResponse(createdItem);
+      const response = await this.buildResponse(createdItem);
+      this.logger.log({
+        event: 'catalog-item-registration-completed',
+        ...logContext,
+      });
+      return response;
     } catch (error: unknown) {
       if (imagePath) {
         await this.storageService.deleteItemImage(imagePath);
       }
 
+      if (error instanceof RepositoryUniqueConstraintError) {
+        this.logger.warn({
+          event: 'catalog-item-registration-race',
+          ...logContext,
+        });
+        throw new ConflictException(
+          'Ya existe un ítem registrado con ese EAN.',
+        );
+      }
+
+      this.logger.error({
+        event: 'catalog-item-registration-failed',
+        error: error instanceof Error ? error.message : 'unknown',
+        ...logContext,
+      });
       throw error;
     }
+  }
+
+  private normalizeRegistrationId(registrationId?: string): string {
+    return registrationId &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        registrationId,
+      )
+      ? registrationId
+      : 'untracked';
   }
 
   async updateItem(

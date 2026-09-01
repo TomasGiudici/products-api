@@ -50,8 +50,9 @@ export class ItemController {
   create(
     @Body() createItemDto: CreateItemDto,
     @UploadedFile() image?: Express.Multer.File,
+    @Headers('x-registration-id') registrationId?: string,
   ): Promise<ItemResponseDto> {
-    return this.itemService.createItem(createItemDto, image);
+    return this.itemService.createItem(createItemDto, image, registrationId);
   }
 
   @Patch(':id')

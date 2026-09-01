@@ -41,6 +41,20 @@ export class BrandService {
     return BrandMapper.toResponseList(brands);
   }
 
+  async search(query: string): Promise<BrandResponseDto[]> {
+    const normalizedQuery = normalizeText(query);
+    if (normalizedQuery.length < 2) return [];
+    return BrandMapper.toResponseList(
+      await this.brandRepository.searchByNormalizedName(normalizedQuery, 10),
+    );
+  }
+
+  async createOrResolve(
+    createBrandDto: CreateBrandDto,
+  ): Promise<BrandReferenceDto> {
+    return this.resolveOrCreateByName(createBrandDto.name);
+  }
+
   async findById(id: number): Promise<BrandResponseDto> {
     const brand = await this.brandRepository.findById(id);
 
